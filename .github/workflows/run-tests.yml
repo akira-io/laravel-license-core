@@ -12,11 +12,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [ 8.2, 8.3, 8.4, 8.5 ]
-        laravel: [ 11.*, 12.* ]
-        exclude:
-          - php: 8.2
-            laravel: 12.*
+        php: [ 8.4 ]
+        laravel: [ 12.* ]
 
     name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }}
 
@@ -31,6 +28,9 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
           coverage: xdebug
           tools: composer:v2
+
+      - name: Install Aspell
+        run: sudo apt-get update && sudo apt-get install -y aspell aspell-en
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
