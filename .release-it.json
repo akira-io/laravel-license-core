@@ -1,0 +1,72 @@
+{
+  "git": {
+    "commitMessage": "chore: release v%s",
+    "requireCleanWorkingDir": true,
+    "requireUpstream": true,
+    "requireCommits": false,
+    "addUntrackedFiles": false,
+    "push": true,
+    "pushArgs": "--follow-tags",
+    "pushRepo": "origin",
+    "tag": true,
+    "tagName": "v%s"
+  },
+  "npm": {
+    "publish": false
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v%s",
+    "preRelease": false,
+    "comments": false,
+    "draft": false
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "infile": "CHANGELOG.md",
+      "preset": "conventionalcommits",
+      "types": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "test",
+          "section": "Tests"
+        },
+        {
+          "type": "ci",
+          "section": "CI/CD"
+        },
+        {
+          "type": "chore",
+          "hidden": true
+        }
+      ]
+    }
+  },
+  "hooks": {
+    "after:version-bump": [
+      "npm run lint"
+    ],
+    "after:release": [
+      "echo 'Release v%s published successfully'"
+    ]
+  }
+}

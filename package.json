@@ -1,0 +1,29 @@
+{
+  "name": "laravel-license",
+  "version": "1.0.0",
+  "description": "[![Latest Version on Packagist](https://img.shields.io/packagist/v/akira/laravel-license.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license) [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/akira/laravel-license/actions?query=workflow%3Arun-tests+branch%3Amain) [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/akira/laravel-license/actions?query=workflow%3A\"Fix+PHP+code+style+issues\"+branch%3Amain) [![Total Downloads](https://img.shields.io/packagist/dt/akira/laravel-license.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license)",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "lint": "composer run test:lint",
+    "release": "release-it",
+    "release:dry": "release-it --dry-run --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akira-license-manager/laravel-license.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akira-license-manager/laravel-license/issues"
+  },
+  "homepage": "https://github.com/akira-license-manager/laravel-license#readme",
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^10.0.2",
+    "release-it": "^19.0.6"
+  }
+}
