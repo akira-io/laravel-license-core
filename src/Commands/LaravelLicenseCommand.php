@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akira\LaravelLicense\Commands;
 
 use Illuminate\Console\Command;
 
-class LaravelLicenseCommand extends Command
+final class LaravelLicenseCommand extends Command
 {
     public $signature = 'laravel-license';
 

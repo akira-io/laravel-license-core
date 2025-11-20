@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Akira\LaravelLicense\Tests\TestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Akira\LaravelLicense\Tests;
 
+use Akira\LaravelLicense\LaravelLicenseServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Akira\LaravelLicense\LaravelLicenseServiceProvider;
 
-class TestCase extends Orchestra
+abstract class TestCase extends Orchestra
 {
     use RefreshDatabase;
 

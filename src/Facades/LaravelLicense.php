@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akira\LaravelLicense\Facades;
 
 use Illuminate\Support\Facades\Facade;
@@ -7,7 +9,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @see \Akira\LaravelLicense\LaravelLicense
  */
-class LaravelLicense extends Facade
+final class LaravelLicense extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

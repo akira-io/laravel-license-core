@@ -1,25 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akira\LaravelLicense;
 
+use Akira\LaravelLicense\Commands\LaravelLicenseCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Akira\LaravelLicense\Commands\LaravelLicenseCommand;
 
-class LaravelLicenseServiceProvider extends PackageServiceProvider
+final class LaravelLicenseServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package
             ->name('laravel-license')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_laravel_license_table')
+            ->hasConfigFile('license')
+            ->hasMigrations([
+                'create_licenses_table',
+            ])
             ->hasCommand(LaravelLicenseCommand::class);
     }
 }
