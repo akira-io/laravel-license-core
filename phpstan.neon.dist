@@ -2,11 +2,21 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
-    level: 5
+    level: max
     paths:
         - src
         - config
         - database
+        - tests
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
+    checkMissingIterableValueType: true
+    checkMissingCallableSignature: true
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: true
+    reportUnusedIgnoredErrors: true
+    ignoreErrors:
+        - identifier: missingType.parameterType
+        - identifier: missingType.return
+    strictTypes: true
