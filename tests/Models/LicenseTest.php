@@ -339,7 +339,7 @@ it('casts scopes to array object', function () {
         'scopes' => ['read', 'write', 'admin'],
     ]);
 
-    $retrieved = License::find($license->id);
+    $retrieved = License::query()->find($license->id);
 
     expect($retrieved->scopes)->toBeInstanceOf(ArrayObject::class)
         ->and(iterator_to_array($retrieved->scopes))->toBe(['read', 'write', 'admin']);

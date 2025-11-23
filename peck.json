@@ -3,7 +3,8 @@
     "ignore": {
         "words": [
             "php",
-            "activations"
+            "activations",
+            "ipv"
         ],
         "paths": []
     }

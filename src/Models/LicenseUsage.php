@@ -42,12 +42,11 @@ final class LicenseUsage extends Model
     {
         return (int) max(0, $this->limit - $this->consumed_units);
     }
-    
-    
+
     /** @return array<string, string> */
     protected function casts(): array
     {
-        
+
         return [
             'consumed_units' => 'integer',
             'limit' => 'integer',

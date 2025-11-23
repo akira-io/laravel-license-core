@@ -47,12 +47,11 @@ final class License extends Model
         'expires_at',
         'grace_ends_at',
     ];
-    
-    
+
     /** @return array<string, string> */
     public function casts(): array
     {
-        
+
         return [
             'expires_at' => 'datetime',
             'grace_ends_at' => 'datetime',
@@ -60,6 +59,7 @@ final class License extends Model
             'scopes' => AsArrayObject::class,
         ];
     }
+
     /** @return  HasMany<LicenseActivation, $this> */
     public function activations(): HasMany
     {

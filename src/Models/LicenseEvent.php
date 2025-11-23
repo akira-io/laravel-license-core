@@ -24,7 +24,6 @@ final class LicenseEvent extends Model
         'payload',
         'created_at',
     ];
-    
 
     public function getTable(): string
     {
@@ -36,12 +35,11 @@ final class LicenseEvent extends Model
     {
         return $this->belongsTo(License::class);
     }
-    
-    
+
     /** @return array<string, class-string> */
     protected function casts(): array
     {
-        
+
         return [
             'payload' => AsArrayObject::class,
             'created_at' => 'datetime',

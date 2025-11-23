@@ -33,12 +33,11 @@ final class LicenseActivation extends Model
     {
         return resolve(ConfigManager::class)->getActivationsTable();
     }
-    
-    
+
     /** @return array<string, string> */
     protected function casts(): array
     {
-        
+
         return [
             'license_id' => 'integer',
             'created_at' => 'datetime',

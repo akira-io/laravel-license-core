@@ -6,9 +6,6 @@ use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\Models\LicenseActivation;
 use Akira\LaravelLicense\Models\LicenseEvent;
 use Akira\LaravelLicense\Models\LicenseUsage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 it('can create license using factory', function () {
     $license = License::factory()->create();
