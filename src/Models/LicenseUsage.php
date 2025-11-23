@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace Akira\LaravelLicense\Models;
 
+use Akira\LaravelLicense\Database\Factories\LicenseUsageFactory;
 use Akira\LaravelLicense\Support\ConfigManager;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $consumed_units
  * @property int $limit
+ * @property-read CarbonInterface|null $created_at
  */
 final class LicenseUsage extends Model
 {
+    /** @use HasFactory<LicenseUsageFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'license_id',
         'consumed_units',
@@ -34,5 +41,17 @@ final class LicenseUsage extends Model
     public function remaining(): int
     {
         return (int) max(0, $this->limit - $this->consumed_units);
+    }
+    
+    
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        
+        return [
+            'consumed_units' => 'integer',
+            'limit' => 'integer',
+            'created_at' => 'datetime',
+        ];
     }
 }

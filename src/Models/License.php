@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Akira\LaravelLicense\Models;
 
+use Akira\LaravelLicense\Database\Factories\LicenseFactory;
 use Akira\LaravelLicense\Enums\LicenseStatus;
 use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Support\ConfigManager;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -30,6 +32,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 final class License extends Model
 {
+    /** @use HasFactory<LicenseFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'key',
         'type',
@@ -42,15 +47,19 @@ final class License extends Model
         'expires_at',
         'grace_ends_at',
     ];
-
-    /** @var array<string, class-string|string> */
-    protected $casts = [
-        'expires_at' => 'datetime',
-        'grace_ends_at' => 'datetime',
-        'fallback' => 'bool',
-        'scopes' => AsArrayObject::class,
-    ];
-
+    
+    
+    /** @return array<string, string> */
+    public function casts(): array
+    {
+        
+        return [
+            'expires_at' => 'datetime',
+            'grace_ends_at' => 'datetime',
+            'fallback' => 'bool',
+            'scopes' => AsArrayObject::class,
+        ];
+    }
     /** @return  HasMany<LicenseActivation, $this> */
     public function activations(): HasMany
     {
@@ -79,8 +88,27 @@ final class License extends Model
         return LicenseStatus::from($this->status);
     }
 
+    public function isExpired(): bool
+    {
+        return $this->expires_at !== null && now()->greaterThan($this->expires_at);
+    }
+
+    public function inGracePeriod(): bool
+    {
+        if ($this->grace_ends_at === null || $this->expires_at === null) {
+            return false;
+        }
+
+        return now()->between($this->expires_at, $this->grace_ends_at);
+    }
+
+    public function getTable(): string
+    {
+        return resolve(ConfigManager::class)->getLicenseTable();
+    }
+
     /** @return Attribute<array<string, mixed>|null, array<string, mixed>|null> */
-    public function meta(): Attribute
+    protected function meta(): Attribute
     {
         return Attribute::make(
             get: function (mixed $value): ?array {
@@ -113,24 +141,5 @@ final class License extends Model
                 return encrypt(json_encode($value));
             },
         );
-    }
-
-    public function isExpired(): bool
-    {
-        return $this->expires_at !== null && now()->greaterThan($this->expires_at);
-    }
-
-    public function inGracePeriod(): bool
-    {
-        if ($this->grace_ends_at === null || $this->expires_at === null) {
-            return false;
-        }
-
-        return now()->between($this->expires_at, $this->grace_ends_at);
-    }
-
-    public function getTable(): string
-    {
-        return resolve(ConfigManager::class)->getLicenseTable();
     }
 }

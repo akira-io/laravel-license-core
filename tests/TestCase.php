@@ -37,6 +37,8 @@ abstract class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
+
+        config()->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
     }
 
     protected function defineDatabaseMigrations(): void
