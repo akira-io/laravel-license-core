@@ -1,19 +1,29 @@
-# Modern, secure and extensible licensing engine for Laravel applications. The Core package provides the full domain logic, models, pipelines, value objects, builders and actions required to implement a complete licensing system inside Laravel — without forcing any UI, API or dashboard layer.
+# Laravel License
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/akira/laravel-license.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/akira/laravel-license/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/akira/laravel-license/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/akira/laravel-license.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+A modern, secure and extensible licensing engine for Laravel applications. This package provides the complete domain logic, models, and business rules required to implement a full-featured licensing system inside Laravel applications.
 
-## Support us
+## Requirements
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/laravel-license.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/laravel-license)
+- PHP 8.4 or higher
+- Laravel 12.x or higher
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+## Features
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- Multiple license types: Lifetime, Annual, Subscription, Trial, and Credits-based
+- License status management: Active, Expired, Suspended, and Revoked
+- Activation tracking with domain, machine hash, IP, and user agent
+- Usage monitoring with consumed units and limits
+- Event logging for complete audit trail
+- Grace period support for expired licenses
+- Encrypted metadata storage
+- Configurable table names and models
+- Full factory support for testing
+- 100% test coverage
 
 ## Installation
 
@@ -40,27 +50,263 @@ This is the contents of the published config file:
 
 ```php
 return [
+    'tables' => [
+        'licenses' => 'licenses',
+        'activations' => 'license_activations',
+        'usages' => 'license_usages',
+        'events' => 'license_events',
+    ],
+
+    'models' => [
+        'license' => License::class,
+        'activation' => LicenseActivation::class,
+        'usage' => LicenseUsage::class,
+        'event' => LicenseEvent::class,
+    ],
 ];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="laravel-license-views"
 ```
 
 ## Usage
 
+### Creating a License
+
 ```php
-$laravelLicense = new Akira\LaravelLicense();
-echo $laravelLicense->echoPhrase('Hello, Akira!');
+use Akira\LaravelLicense\Models\License;
+use Akira\LaravelLicense\Enums\LicenseType;
+use Akira\LaravelLicense\Enums\LicenseStatus;
+
+$license = License::create([
+    'key' => 'XXXX-XXXX-XXXX-XXXX',
+    'type' => LicenseType::ANNUAL->value,
+    'status' => LicenseStatus::ACTIVE->value,
+    'max_activations' => 5,
+    'max_seats' => 10,
+    'expires_at' => now()->addYear(),
+]);
 ```
 
+### Using Factories
+
+```php
+// Create a basic license
+$license = License::factory()->create();
+
+// Create an active annual license
+$license = License::factory()
+    ->active()
+    ->annual()
+    ->create();
+
+// Create a license with grace period
+$license = License::factory()
+    ->withGracePeriod()
+    ->create();
+
+// Create a license with metadata
+$license = License::factory()
+    ->withMeta(['customer_id' => 123])
+    ->create();
+```
+
+### License Activation
+
+```php
+use Akira\LaravelLicense\Models\LicenseActivation;
+
+$activation = LicenseActivation::create([
+    'license_id' => $license->id,
+    'domain' => 'example.com',
+    'machine_hash' => hash('sha256', 'unique-machine-id'),
+    'ip' => request()->ip(),
+    'user_agent' => request()->userAgent(),
+]);
+
+// Using factory
+$activation = LicenseActivation::factory()
+    ->forLicense($license)
+    ->withDomain('example.com')
+    ->create();
+```
+
+### Usage Tracking
+
+```php
+use Akira\LaravelLicense\Models\LicenseUsage;
+
+$usage = LicenseUsage::create([
+    'license_id' => $license->id,
+    'consumed_units' => 0,
+    'limit' => 1000,
+]);
+
+// Check remaining units
+$remaining = $usage->remaining(); // 1000
+
+// Consume units
+$usage->update(['consumed_units' => 250]);
+$remaining = $usage->remaining(); // 750
+
+// Using factory
+$usage = LicenseUsage::factory()
+    ->forLicense($license)
+    ->withLimit(1000)
+    ->fresh() // 0 consumed units
+    ->create();
+```
+
+### Event Logging
+
+```php
+use Akira\LaravelLicense\Models\LicenseEvent;
+use Akira\LaravelLicense\Enums\LicenseEventType;
+
+$event = LicenseEvent::create([
+    'license_id' => $license->id,
+    'type' => LicenseEventType::ACTIVATED->value,
+    'payload' => [
+        'ip' => request()->ip(),
+        'user_agent' => request()->userAgent(),
+    ],
+    'created_at' => now(),
+]);
+
+// Using factory
+$event = LicenseEvent::factory()
+    ->forLicense($license)
+    ->activated()
+    ->withPayload(['user_id' => 123])
+    ->create();
+```
+
+### Working with License Status
+
+```php
+// Check if license is expired
+if ($license->isExpired()) {
+    // Handle expired license
+}
+
+// Check if license is in grace period
+if ($license->inGracePeriod()) {
+    // Show warning to user
+}
+
+// Get license status as enum
+$status = $license->statusEnum(); // LicenseStatus enum
+
+// Get license type as enum
+$type = $license->typeEnum(); // LicenseType enum
+```
+
+### Relationships
+
+```php
+// Get all activations for a license
+$activations = $license->activations;
+
+// Get all usage records for a license
+$usages = $license->usages;
+
+// Get all events for a license
+$events = $license->events;
+
+// Get license from activation
+$license = $activation->license;
+```
+
+### Custom Table Names
+
+You can customize table names in the config file:
+
+```php
+'tables' => [
+    'licenses' => 'my_licenses',
+    'activations' => 'my_activations',
+    'usages' => 'my_usages',
+    'events' => 'my_events',
+],
+```
+
+### Encrypted Metadata
+
+License metadata is automatically encrypted:
+
+```php
+$license = License::create([
+    'key' => 'XXXX-XXXX-XXXX-XXXX',
+    'type' => LicenseType::ANNUAL->value,
+    'status' => LicenseStatus::ACTIVE->value,
+    'meta' => [
+        'customer_email' => 'user@example.com',
+        'plan_name' => 'Professional',
+        'features' => ['api_access', 'priority_support'],
+    ],
+]);
+
+// Metadata is automatically encrypted in database
+// and decrypted when accessed
+$email = $license->meta['customer_email'];
+```
+
+## Available License Types
+
+The package includes the following license types through the `LicenseType` enum:
+
+- `LIFETIME` - Permanent license with no expiration
+- `ANNUAL` - Annual subscription that expires after one year
+- `SUBSCRIPTION` - Recurring subscription-based license
+- `TRIAL` - Trial license with limited time period
+- `CREDITS` - Credit-based license for usage tracking
+
+## Available License Statuses
+
+License statuses are managed through the `LicenseStatus` enum:
+
+- `ACTIVE` - License is active and can be used
+- `EXPIRED` - License has passed its expiration date
+- `SUSPENDED` - License is temporarily suspended
+- `REVOKED` - License has been permanently revoked
+
+## Available Event Types
+
+Events are tracked using the `LicenseEventType` enum:
+
+- `CREATED` - License was created
+- `ACTIVATED` - License was activated on a device/domain
+- `DEACTIVATED` - License was deactivated
+- `ROTATED` - License key was rotated
+- `REVOKED` - License was revoked
+- `USAGE_CONSUMED` - Usage units were consumed
+- `EXPIRED` - License expired
+- `ABUSE_DETECTED` - Potential abuse was detected
+
 ## Testing
+
+Run the test suite:
 
 ```bash
 composer test
 ```
+
+Run tests with coverage:
+
+```bash
+composer test:coverage
+```
+
+The package includes 148 tests with 100% code coverage.
+
+## Documentation
+
+Complete documentation is available in the [docs](docs/) directory:
+
+- [Introduction](docs/01-introduction.md) - Package overview and features
+- [Installation](docs/02-installation.md) - Installation and setup guide
+- [Configuration](docs/03-configuration.md) - Configuration options
+- [Models](docs/04-models.md) - Model documentation
+- [Usage Guide](docs/05-usage-guide.md) - Comprehensive usage examples
+- [Enums](docs/06-enums.md) - Available enumerations
+- [Factories](docs/07-factories.md) - Testing with factories
 
 ## Changelog
 
