@@ -1,8 +1,8 @@
-# Laravel License Documentation
+# Documentation
 
 Welcome to the Laravel License documentation. This guide will help you understand and use all features of the package.
 
-## Documentation Index
+## Table of Contents
 
 ### Getting Started
 
@@ -56,6 +56,23 @@ Welcome to the Laravel License documentation. This guide will help you understan
    - LicenseEventFactory
    - Testing scenarios
    - Seeding data
+
+8. [Testing](08-testing.md)
+   - Running tests
+   - Test structure
+   - Writing tests
+   - Best practices
+   - Coverage requirements
+
+9. [Value Objects](09-value-objects.md)
+   - LicenseKey
+   - DomainName
+   - MachineFingerprint
+   - UsageAmount
+   - LicenseScopes
+   - LicenseMeta
+   - LicenseContext
+   - UpdateEntitlement
 
 ## Quick Start
 
@@ -132,6 +149,8 @@ $remaining = $usage->remaining(); // 900
 - **PHP Version**: 8.4+
 - **Laravel Version**: 12.x or higher
 - **Test Coverage**: 100%
+- **Total Tests**: 213
+- **Total Assertions**: 338
 
 ## Support
 

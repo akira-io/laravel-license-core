@@ -596,8 +596,8 @@ class LicenseSeeder extends Seeder
 
 Learn about:
 
-- [Testing](08-testing.md) - Writing comprehensive tests
-- [API Reference](09-api-reference.md) - Complete API documentation
+- [Testing](08-testing.md) - Comprehensive testing guide
+- Test examples in the `tests/` directory
 
 ---
 

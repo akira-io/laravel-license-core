@@ -23,7 +23,7 @@ A modern, secure and extensible licensing engine for Laravel applications. This 
 - Encrypted metadata storage
 - Configurable table names and models
 - Full factory support for testing
-- 100% test coverage
+- 100% test coverage (213 tests, 338 assertions)
 
 ## Installation
 
@@ -294,12 +294,35 @@ Run tests with coverage:
 composer test:coverage
 ```
 
-The package includes 148 tests with 100% code coverage.
+The package includes **213 tests** with **100% code coverage** across all components:
+
+### Test Coverage
+
+- **Commands**: LaravelLicenseCommand
+- **Enums**: LicenseType, LicenseStatus, LicenseEventType
+- **Facades**: LaravelLicense
+- **Models**: License, LicenseActivation, LicenseEvent, LicenseUsage
+- **Support**: ConfigManager
+- **Value Objects**: DomainName, LicenseContext, LicenseKey, LicenseMeta, LicenseScopes, MachineFingerprint, UpdateEntitlement, UsageAmount
+
+### Additional Test Commands
+
+```bash
+# Run specific test file
+./vendor/bin/pest tests/Models/LicenseTest.php
+
+# Run tests in specific directory
+./vendor/bin/pest tests/ValueObjects/
+
+# Run with detailed coverage
+./vendor/bin/pest --coverage --min=100
+```
 
 ## Documentation
 
 Complete documentation is available in the [docs](docs/) directory:
 
+- [Index](docs/00-index.md) - Documentation index and navigation
 - [Introduction](docs/01-introduction.md) - Package overview and features
 - [Installation](docs/02-installation.md) - Installation and setup guide
 - [Configuration](docs/03-configuration.md) - Configuration options
@@ -307,6 +330,8 @@ Complete documentation is available in the [docs](docs/) directory:
 - [Usage Guide](docs/05-usage-guide.md) - Comprehensive usage examples
 - [Enums](docs/06-enums.md) - Available enumerations
 - [Factories](docs/07-factories.md) - Testing with factories
+- [Testing](docs/08-testing.md) - Comprehensive testing guide
+- [Value Objects](docs/09-value-objects.md) - Immutable domain objects
 
 ## Changelog
 
