@@ -18,6 +18,7 @@ final class LicenseActivation extends Model
         'user_agent',
     ];
 
+    /** @return  BelongsTo<License, $this> */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);

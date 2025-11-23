@@ -51,16 +51,19 @@ final class License extends Model
         'scopes' => AsArrayObject::class,
     ];
 
+    /** @return  HasMany<LicenseActivation, $this> */
     public function activations(): HasMany
     {
         return $this->hasMany(LicenseActivation::class);
     }
 
+    /** @return  HasMany<LicenseUsage, $this> */
     public function usages(): HasMany
     {
         return $this->hasMany(LicenseUsage::class);
     }
 
+    /** @return  HasMany<LicenseEvent, $this> */
     public function events(): HasMany
     {
         return $this->hasMany(LicenseEvent::class);

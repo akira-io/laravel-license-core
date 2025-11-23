@@ -31,6 +31,7 @@ final class LicenseEvent extends Model
         return resolve(ConfigManager::class)->getEventsTable();
     }
 
+    /** @return  BelongsTo<License, $this> */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);

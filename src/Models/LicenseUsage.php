@@ -25,6 +25,7 @@ final class LicenseUsage extends Model
         return resolve(ConfigManager::class)->getUsagesTable();
     }
 
+    /** @return  BelongsTo<License, $this> */
     public function license(): BelongsTo
     {
         return $this->belongsTo(License::class);
@@ -32,6 +33,6 @@ final class LicenseUsage extends Model
 
     public function remaining(): int
     {
-        return (int) max(0, (int) $this->limit - (int) $this->consumed_units);
+        return (int) max(0, $this->limit - $this->consumed_units);
     }
 }
