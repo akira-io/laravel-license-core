@@ -57,14 +57,19 @@ Welcome to the Laravel License documentation. This guide will help you understan
    - Testing scenarios
    - Seeding data
 
-8. [Testing](08-testing.md)
-   - Running tests
-   - Test structure
-   - Writing tests
+8. [Exceptions](08-exceptions.md)
+   - Custom exceptions
+   - Exception hierarchy
+   - Error handling
    - Best practices
-   - Coverage requirements
 
-9. [Value Objects](09-value-objects.md)
+9. [Internationalization](09-internationalization.md)
+   - Available languages
+   - Publishing translations
+   - Translation keys
+   - Adding new languages
+
+10. [Value Objects](10-value-objects.md)
    - LicenseKey
    - DomainName
    - MachineFingerprint
@@ -73,6 +78,13 @@ Welcome to the Laravel License documentation. This guide will help you understan
    - LicenseMeta
    - LicenseContext
    - UpdateEntitlement
+
+11. [Testing](11-testing.md)
+   - Running tests
+   - Test structure
+   - Writing tests
+   - Best practices
+   - Coverage requirements
 
 ## Quick Start
 
