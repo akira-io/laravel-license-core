@@ -41,7 +41,10 @@
         "psr-4": {
             "Akira\\LaravelLicense\\": "src/",
             "Akira\\LaravelLicense\\Database\\Factories\\": "database/factories/"
-        }
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

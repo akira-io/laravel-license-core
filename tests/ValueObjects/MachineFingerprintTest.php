@@ -4,7 +4,7 @@ declare(strict_types=1);
 use Akira\LaravelLicense\ValueObjects\MachineFingerprint;
 
 it('creates with hash', function () {
-    expect((new MachineFingerprint('hash123'))->hash)->toBe('hash123');
+    expect(new MachineFingerprint('hash123')->hash)->toBe('hash123');
 });
 
 it('creates from raw', function () {
