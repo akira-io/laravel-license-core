@@ -14,6 +14,9 @@
   "npm": {
     "publish": false
   },
+  "hooks": {
+    "before:release": "composer test"
+  },
   "plugins": {
     "@release-it/conventional-changelog": {
       "preset": {
