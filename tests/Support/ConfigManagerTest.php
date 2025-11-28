@@ -102,3 +102,154 @@ it('is registered as singleton', function () {
 
     expect($manager1)->toBe($manager2);
 });
+
+it('gets abuse detection config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getAbuseDetectionConfig();
+
+    expect($config)->toBeArray()
+        ->and($config['enabled'])->toBeTrue()
+        ->and($config['window_minutes'])->toBe(10)
+        ->and($config['activation_threshold'])->toBe(10)
+        ->and($config['events_to_monitor'])->toBe(['activated'])
+        ->and($config['action_on_abuse'])->toBe('log');
+});
+
+it('gets grace period config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getGracePeriodConfig();
+
+    expect($config)->toBeArray()
+        ->and($config['subscription'])->toBe(30)
+        ->and($config['trial'])->toBe(7);
+});
+
+it('gets license types config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getLicenseTypesConfig();
+
+    expect($config)->toBeArray()
+        ->and($config)->toHaveKey('lifetime')
+        ->and($config)->toHaveKey('annual')
+        ->and($config)->toHaveKey('subscription');
+});
+
+it('gets license type config by name', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getLicenseTypeConfig('subscription');
+
+    expect($config)->toBeArray()
+        ->and($config['requires_activation'])->toBeTrue()
+        ->and($config['supports_grace_period'])->toBeTrue();
+});
+
+it('gets domain validation config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getDomainValidationConfig();
+
+    expect($config)->toBeArray()
+        ->and($config['pattern_type'])->toBe('glob')
+        ->and($config['case_sensitive'])->toBeFalse();
+});
+
+it('gets key generation config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getKeyGenerationConfig();
+
+    expect($config)->toBeArray()
+        ->and($config['prefix'])->toBe('LIC')
+        ->and($config['format'])->toBe('uuid');
+});
+
+it('gets pipeline config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getPipelineConfig();
+
+    expect($config)->toBeArray()
+        ->and($config)->toHaveKey('usage')
+        ->and($config)->toHaveKey('update')
+        ->and($config['usage'])->toBeArray()
+        ->and($config['update'])->toBeArray();
+});
+
+it('gets credits config array', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getCreditsConfig();
+
+    expect($config)->toBeArray()
+        ->and($config['allow_partial_consumption'])->toBeFalse()
+        ->and($config['allow_refund'])->toBeFalse();
+});
+
+it('gets abuse detection value object', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getAbuseDetection();
+
+    expect($config->enabled)->toBeTrue()
+        ->and($config->windowMinutes)->toBe(10)
+        ->and($config->activationThreshold)->toBe(10);
+});
+
+it('gets grace period value object', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getGracePeriod();
+
+    expect($config->subscription)->toBe(30)
+        ->and($config->trial)->toBe(7);
+});
+
+it('gets license type value object by name', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getLicenseType('subscription');
+
+    expect($config->requiresActivation)->toBeTrue()
+        ->and($config->supportsGracePeriod)->toBeTrue();
+});
+
+it('gets domain validation value object', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getDomainValidation();
+
+    expect($config->patternType)->toBe('glob')
+        ->and($config->caseSensitive)->toBeFalse();
+});
+
+it('gets key generation value object', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getKeyGeneration();
+
+    expect($config->prefix)->toBe('LIC')
+        ->and($config->format)->toBe('uuid');
+});
+
+it('gets pipeline value object', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getPipeline();
+
+    expect($config->usageStages)->toBeArray()
+        ->and($config->updateStages)->toBeArray()
+        ->and($config->usageStages)->toContain('abuse_heuristics');
+});
+
+it('gets credits value object', function () {
+    $manager = app(ConfigManager::class);
+
+    $config = $manager->getCredits();
+
+    expect($config->allowPartialConsumption)->toBeFalse()
+        ->and($config->allowRefund)->toBeFalse();
+});
