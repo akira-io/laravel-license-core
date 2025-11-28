@@ -1,9 +1,9 @@
 # Laravel License
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/akira/laravel-license.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/akira/laravel-license/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/akira/laravel-license/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/akira/laravel-license.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/akira/laravel-license-core.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license-core)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license-core/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/akira/laravel-license-core/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/akira/laravel-license-core/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/akira/laravel-license-core/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/akira/laravel-license-core.svg?style=flat-square)](https://packagist.org/packages/akira/laravel-license-core)
 
 A modern, secure and extensible licensing engine for Laravel applications. This package provides the complete domain logic, models, and business rules required to implement a full-featured licensing system inside Laravel applications.
 
@@ -30,20 +30,20 @@ A modern, secure and extensible licensing engine for Laravel applications. This 
 You can install the package via composer:
 
 ```bash
-composer require akira/laravel-license
+composer require akira/laravel-license-core
 ```
 
 You can publish and run the migrations with:
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-migrations"
+php artisan vendor:publish --tag="laravel-license-core-migrations"
 php artisan migrate
 ```
 
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-config"
+php artisan vendor:publish --tag="laravel-license-core-config"
 ```
 
 This is the contents of the published config file:

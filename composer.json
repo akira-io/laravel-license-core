@@ -1,12 +1,12 @@
 {
-    "name": "akira/laravel-license",
+    "name": "akira/laravel-license-core",
     "description": "Modern, secure and extensible licensing engine for Laravel applications. The Core package provides the full domain logic, models, pipelines, value objects, builders and actions required to implement a complete licensing system inside Laravel — without forcing any UI, API or dashboard layer.",
     "keywords": [
         "akira",
         "laravel",
-        "laravel-license"
+        "laravel-license-core"
     ],
-    "homepage": "https://github.com/akira/laravel-license",
+    "homepage": "https://github.com/akira/laravel-license-core",
     "license": "MIT",
     "authors": [
         {

@@ -22,7 +22,7 @@ Before installing, ensure your system meets these requirements:
 Install the package using Composer:
 
 ```bash
-composer require akira/laravel-license
+composer require akira/laravel-license-core
 ```
 
 ### Step 2: Publish Migrations
@@ -30,7 +30,7 @@ composer require akira/laravel-license
 Publish the package migrations to your application:
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-migrations"
+php artisan vendor:publish --tag="laravel-license-core-migrations"
 ```
 
 This will create four migration files in your `database/migrations` directory:
@@ -57,7 +57,7 @@ This will create the following tables:
 If you need to customize table names or model classes, publish the configuration file:
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-config"
+php artisan vendor:publish --tag="laravel-license-core-config"
 ```
 
 This creates `config/license.php` in your application.
@@ -146,13 +146,13 @@ When upgrading to a new version of the package:
 ### 1. Update the Package
 
 ```bash
-composer update akira/laravel-license
+composer update akira/laravel-license-core
 ```
 
 ### 2. Publish New Migrations
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-migrations" --force
+php artisan vendor:publish --tag="laravel-license-core-migrations" --force
 ```
 
 ### 3. Run New Migrations
@@ -194,7 +194,7 @@ php artisan migrate
 
 **Memory limit exceeded**:
 ```bash
-php -d memory_limit=-1 /usr/local/bin/composer require akira/laravel-license
+php -d memory_limit=-1 /usr/local/bin/composer require akira/laravel-license-core
 ```
 
 **Version conflicts**:
@@ -232,7 +232,7 @@ php artisan migrate:rollback --path=database/migrations/create_laravel_license_t
 ### 2. Remove Package
 
 ```bash
-composer remove akira/laravel-license
+composer remove akira/laravel-license-core
 ```
 
 ### 3. Clean Up

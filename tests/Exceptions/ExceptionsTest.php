@@ -33,35 +33,35 @@ it('LicenseNotFoundException can be created', function () {
     $exception = LicenseNotFoundException::create();
 
     expect($exception)->toBeInstanceOf(LicenseNotFoundException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.license_not_found'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_not_found'));
 });
 
 it('LicenseNotLoadedException can be created', function () {
     $exception = LicenseNotLoadedException::create();
 
     expect($exception)->toBeInstanceOf(LicenseNotLoadedException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.license_not_loaded'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_not_loaded'));
 });
 
 it('LicenseRevokedException can be created', function () {
     $exception = LicenseRevokedException::create();
 
     expect($exception)->toBeInstanceOf(LicenseRevokedException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.license_revoked'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_revoked'));
 });
 
 it('LicenseSuspendedException can be created', function () {
     $exception = LicenseSuspendedException::create();
 
     expect($exception)->toBeInstanceOf(LicenseSuspendedException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.license_suspended'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_suspended'));
 });
 
 it('LicenseExpiredException can be created', function () {
     $exception = LicenseExpiredException::create();
 
     expect($exception)->toBeInstanceOf(LicenseExpiredException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.license_expired'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_expired'));
 });
 
 it('LicenseExpiredException can be created with specific date', function () {
@@ -69,35 +69,35 @@ it('LicenseExpiredException can be created with specific date', function () {
     $exception = LicenseExpiredException::create($date);
 
     expect($exception)->toBeInstanceOf(LicenseExpiredException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.license_expired', ['date' => $date]));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_expired', ['date' => $date]));
 });
 
 it('ActivationLimitReachedException can be created', function () {
     $exception = ActivationLimitReachedException::create();
 
     expect($exception)->toBeInstanceOf(ActivationLimitReachedException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.activation_limit_reached'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.activation_limit_reached'));
 });
 
 it('DomainBlockedException can be created with domain', function () {
     $exception = DomainBlockedException::forDomain('blocked.com');
 
     expect($exception)->toBeInstanceOf(DomainBlockedException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.domain_blocked', ['domain' => 'blocked.com']));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.domain_blocked', ['domain' => 'blocked.com']));
 });
 
 it('DomainNotAllowedException can be created with domain', function () {
     $exception = DomainNotAllowedException::forDomain('notallowed.com');
 
     expect($exception)->toBeInstanceOf(DomainNotAllowedException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.domain_not_allowed', ['domain' => 'notallowed.com']));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.domain_not_allowed', ['domain' => 'notallowed.com']));
 });
 
 it('InsufficientCreditsException can be created', function () {
     $exception = InsufficientCreditsException::create(100, 50);
 
     expect($exception)->toBeInstanceOf(InsufficientCreditsException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.insufficient_credits', [
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.insufficient_credits', [
             'required' => 100,
             'available' => 50,
         ]));
@@ -107,14 +107,14 @@ it('UsageNotConfiguredException can be created', function () {
     $exception = UsageNotConfiguredException::create();
 
     expect($exception)->toBeInstanceOf(UsageNotConfiguredException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.usage_not_configured'));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.usage_not_configured'));
 });
 
 it('VersionNotCoveredException can be created', function () {
     $exception = VersionNotCoveredException::forVersion('2.0.0');
 
     expect($exception)->toBeInstanceOf(VersionNotCoveredException::class)
-        ->and($exception->getMessage())->toBe(__('laravel-license::license.exceptions.version_not_covered', ['version' => '2.0.0']));
+        ->and($exception->getMessage())->toBe(__('laravel-license-core::license.exceptions.version_not_covered', ['version' => '2.0.0']));
 });
 
 it('exceptions can be caught as LicenseException', function () {
@@ -122,6 +122,6 @@ it('exceptions can be caught as LicenseException', function () {
         throw LicenseNotFoundException::create();
     } catch (LicenseException $e) {
         expect($e)->toBeInstanceOf(LicenseException::class)
-            ->and($e->getMessage())->toBe(__('laravel-license::license.exceptions.license_not_found'));
+            ->and($e->getMessage())->toBe(__('laravel-license-core::license.exceptions.license_not_found'));
     }
 });

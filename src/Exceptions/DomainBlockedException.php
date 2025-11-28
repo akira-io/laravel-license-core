@@ -8,6 +8,6 @@ final class DomainBlockedException extends LicenseException
 {
     public static function forDomain(string $domain): self
     {
-        return new self(__('laravel-license::license.exceptions.domain_blocked', ['domain' => $domain]));
+        return new self(__('laravel-license-core::license.exceptions.domain_blocked', ['domain' => $domain]));
     }
 }

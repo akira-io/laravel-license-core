@@ -12,10 +12,10 @@ Laravel License comes with built-in internationalization support for multiple la
 To customize translations, publish the language files:
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-translations"
+php artisan vendor:publish --tag="laravel-license-core-translations"
 ```
 
-This will copy translation files to `resources/lang/vendor/laravel-license/`.
+This will copy translation files to `resources/lang/vendor/laravel-license-core/`.
 
 ## Available Translation Keys
 
@@ -87,16 +87,16 @@ $event = __('laravel-license::license.events.activated');
 
 To add support for a new language:
 
-1. Create a new directory in `resources/lang/vendor/laravel-license/`
+1. Create a new directory in `resources/lang/vendor/laravel-license-core/`
 2. Copy the `en/license.php` file to your new language directory
 3. Translate all the strings
 
 Example for Spanish:
 
 ```bash
-mkdir -p resources/lang/vendor/laravel-license/es
-cp resources/lang/vendor/laravel-license/en/license.php \
-   resources/lang/vendor/laravel-license/es/license.php
+mkdir -p resources/lang/vendor/laravel-license-core/es
+cp resources/lang/vendor/laravel-license-core/en/license.php \
+   resources/lang/vendor/laravel-license-core/es/license.php
 ```
 
 Then edit the Spanish file with your translations.

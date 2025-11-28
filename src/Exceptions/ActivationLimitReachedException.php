@@ -8,6 +8,6 @@ final class ActivationLimitReachedException extends LicenseException
 {
     public static function create(): self
     {
-        return new self(__('laravel-license::license.exceptions.activation_limit_reached'));
+        return new self(__('laravel-license-core::license.exceptions.activation_limit_reached'));
     }
 }

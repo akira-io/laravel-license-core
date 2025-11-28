@@ -25,7 +25,7 @@ final class LaravelLicenseServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package
-            ->name('laravel-license')
+            ->name('laravel-license-core')
             ->hasConfigFile('license')
             ->hasTranslations()
             ->hasMigrations([

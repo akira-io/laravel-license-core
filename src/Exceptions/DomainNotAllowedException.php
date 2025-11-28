@@ -8,6 +8,6 @@ final class DomainNotAllowedException extends LicenseException
 {
     public static function forDomain(string $domain): self
     {
-        return new self(__('laravel-license::license.exceptions.domain_not_allowed', ['domain' => $domain]));
+        return new self(__('laravel-license-core::license.exceptions.domain_not_allowed', ['domain' => $domain]));
     }
 }

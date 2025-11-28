@@ -7,7 +7,7 @@ This guide covers all configuration options available in Laravel License.
 The configuration file is located at `config/license.php`. If you haven't published it yet:
 
 ```bash
-php artisan vendor:publish --tag="laravel-license-config"
+php artisan vendor:publish --tag="laravel-license-core-config"
 ```
 
 ## Default Configuration
