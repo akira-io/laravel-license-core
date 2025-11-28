@@ -8,10 +8,13 @@ use Akira\LaravelLicense\Contracts\LicenseValidatorStage;
 use Akira\LaravelLicense\Exceptions\DomainBlockedException;
 use Akira\LaravelLicense\Exceptions\DomainNotAllowedException;
 use Akira\LaravelLicense\Exceptions\LicenseNotLoadedException;
+use Akira\LaravelLicense\ValueObjects\DomainValidationConfiguration;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 
-final class DomainCheckStage implements LicenseValidatorStage
+final readonly class DomainCheckStage implements LicenseValidatorStage
 {
+    public function __construct(private DomainValidationConfiguration $domainConfig) {}
+
     public function __invoke(LicenseContext $context): LicenseContext
     {
         $license = $context->license ?? throw LicenseNotLoadedException::create();
@@ -49,8 +52,18 @@ final class DomainCheckStage implements LicenseValidatorStage
 
     private function matches(string $domain, string $pattern): bool
     {
-        $pattern = str_replace('\*', '.*', preg_quote($pattern, '/'));
+        $flags = $this->domainConfig->caseSensitive ? '' : 'i';
 
-        return (bool) preg_match("/^{$pattern}$/i", $domain);
+        return match ($this->domainConfig->patternType) {
+            'exact' => $this->domainConfig->caseSensitive
+                ? $domain === $pattern
+                : mb_strtolower($domain) === mb_strtolower($pattern),
+            'glob' => (bool) preg_match(
+                '/^'.str_replace('\*', '.*', preg_quote($pattern, '/')).'$/'.$flags,
+                $domain
+            ),
+            'regex' => (bool) preg_match('/'.$pattern.'/'.$flags, $domain),
+            default => false,
+        };
     }
 }

@@ -7,10 +7,14 @@ use Akira\LaravelLicense\Exceptions\LicenseExpiredException;
 use Akira\LaravelLicense\Exceptions\LicenseNotLoadedException;
 use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\Pipelines\Stages\GracePeriodStage;
+use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
 
 test('allows lifetime license', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $license = License::factory()->create([
         'type' => LicenseType::LIFETIME->value,
         'expires_at' => now()->subDay(),
@@ -22,13 +26,15 @@ test('allows lifetime license', function () {
         license: $license,
     );
 
-    $stage = new GracePeriodStage();
     $result = $stage($context);
 
     expect($result)->toBe($context);
 });
 
 test('allows annual license', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $license = License::factory()->create([
         'type' => LicenseType::ANNUAL->value,
         'expires_at' => now()->subDay(),
@@ -40,13 +46,15 @@ test('allows annual license', function () {
         license: $license,
     );
 
-    $stage = new GracePeriodStage();
     $result = $stage($context);
 
     expect($result)->toBe($context);
 });
 
 test('allows credits license', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $license = License::factory()->create([
         'type' => LicenseType::CREDITS->value,
         'expires_at' => now()->subDay(),
@@ -58,13 +66,15 @@ test('allows credits license', function () {
         license: $license,
     );
 
-    $stage = new GracePeriodStage();
     $result = $stage($context);
 
     expect($result)->toBe($context);
 });
 
 test('allows expired subscription within grace period', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $license = License::factory()->create([
         'type' => LicenseType::SUBSCRIPTION->value,
         'expires_at' => now()->subDays(3),
@@ -77,13 +87,15 @@ test('allows expired subscription within grace period', function () {
         license: $license,
     );
 
-    $stage = new GracePeriodStage();
     $result = $stage($context);
 
     expect($result)->toBe($context);
 });
 
 test('throws exception when expired subscription outside grace period', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $license = License::factory()->create([
         'type' => LicenseType::SUBSCRIPTION->value,
         'expires_at' => now()->subDays(15),
@@ -95,11 +107,13 @@ test('throws exception when expired subscription outside grace period', function
         license: $license,
     );
 
-    $stage = new GracePeriodStage();
     $stage($context);
 })->throws(LicenseExpiredException::class);
 
 test('allows active subscription', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $license = License::factory()->create([
         'type' => LicenseType::SUBSCRIPTION->value,
         'expires_at' => now()->addMonth(),
@@ -111,18 +125,19 @@ test('allows active subscription', function () {
         license: $license,
     );
 
-    $stage = new GracePeriodStage();
     $result = $stage($context);
 
     expect($result)->toBe($context);
 });
 
 test('throws exception when license not loaded', function () {
+    $configManager = resolve(ConfigManager::class);
+    $stage = new GracePeriodStage($configManager->getGracePeriod());
+
     $context = new LicenseContext(
         key: LicenseKey::fromString('LLLLLLLL-LLLLLLLL-LLLLLLLL-LLLLLLLL'),
         domain: null,
     );
 
-    $stage = new GracePeriodStage();
     $stage($context);
 })->throws(LicenseNotLoadedException::class);

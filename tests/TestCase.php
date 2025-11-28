@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Akira\LaravelLicense\Tests;
 
+use Akira\Debugger\DebuggerServiceProvider;
 use Akira\LaravelLicense\LaravelLicenseServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,6 +27,7 @@ abstract class TestCase extends Orchestra
     {
         return [
             LaravelLicenseServiceProvider::class,
+            DebuggerServiceProvider::class,
         ];
     }
 

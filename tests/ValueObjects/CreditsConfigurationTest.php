@@ -2,63 +2,69 @@
 
 declare(strict_types=1);
 
+use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\CreditsConfiguration;
 
-test('creates credits configuration from array', function () {
-    $config = CreditsConfiguration::fromArray([
-        'allow_partial_consumption' => false,
-        'allow_refund' => false,
-    ]);
+test('creates credits configuration via config manager', function () {
+    $configManager = resolve(ConfigManager::class);
+    $config = $configManager->getCredits();
 
-    expect($config->allowPartialConsumption)->toBeFalse()
-        ->and($config->allowRefund)->toBeFalse();
+    expect($config)->toBeInstanceOf(CreditsConfiguration::class);
 });
 
-test('uses default values when not provided', function () {
-    $config = CreditsConfiguration::fromArray([]);
+test('credits configuration with partial consumption', function () {
+    $config = new CreditsConfiguration(
+        allowPartialConsumption: true,
+        allowRefund: false,
+    );
 
-    expect($config->allowPartialConsumption)->toBeFalse()
+    expect($config->allowPartialConsumption)->toBeTrue()
         ->and($config->allowRefund)->toBeFalse();
-});
-
-test('allows partial consumption when enabled', function () {
-    $config = CreditsConfiguration::fromArray([
-        'allow_partial_consumption' => true,
-    ]);
-
-    expect($config->allowPartialConsumption)->toBeTrue();
 });
 
 test('allows refund when enabled', function () {
-    $config = CreditsConfiguration::fromArray([
-        'allow_refund' => true,
-    ]);
+    $config = new CreditsConfiguration(
+        allowPartialConsumption: false,
+        allowRefund: true,
+    );
 
     expect($config->allowRefund)->toBeTrue();
 });
 
 test('allows both partial consumption and refund', function () {
-    $config = CreditsConfiguration::fromArray([
-        'allow_partial_consumption' => true,
-        'allow_refund' => true,
-    ]);
+    $config = new CreditsConfiguration(
+        allowPartialConsumption: true,
+        allowRefund: true,
+    );
 
     expect($config->allowPartialConsumption)->toBeTrue()
         ->and($config->allowRefund)->toBeTrue();
 });
 
 test('disables partial consumption when needed', function () {
-    $config = CreditsConfiguration::fromArray([
-        'allow_partial_consumption' => false,
-    ]);
+    $config = new CreditsConfiguration(
+        allowPartialConsumption: false,
+        allowRefund: false,
+    );
 
     expect($config->allowPartialConsumption)->toBeFalse();
 });
 
 test('disables refund when needed', function () {
-    $config = CreditsConfiguration::fromArray([
-        'allow_refund' => false,
-    ]);
+    $config = new CreditsConfiguration(
+        allowPartialConsumption: false,
+        allowRefund: false,
+    );
 
     expect($config->allowRefund)->toBeFalse();
+});
+
+test('has both flags enabled', function () {
+    $config = new CreditsConfiguration(
+        allowPartialConsumption: true,
+        allowRefund: true,
+    );
+
+    expect($config->allowPartialConsumption)->toBeTrue()
+        ->and($config->allowRefund)->toBeTrue();
 });

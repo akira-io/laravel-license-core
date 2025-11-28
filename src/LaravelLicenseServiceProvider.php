@@ -16,6 +16,7 @@ use Akira\LaravelLicense\Pipelines\Stages\MachineCheckStage;
 use Akira\LaravelLicense\Pipelines\Stages\ResolveLicenseStage;
 use Akira\LaravelLicense\Pipelines\Stages\StatusCheckStage;
 use Akira\LaravelLicense\Pipelines\Stages\UpdateWindowStage;
+use Akira\LaravelLicense\Support\ConfigManager;
 use Illuminate\Contracts\Foundation\Application;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -36,6 +37,32 @@ final class LaravelLicenseServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
+        $configManager = $this->app->singleton('license.config-manager', ConfigManager::class);
+
+        $this->app->bind(AbuseHeuristicsStage::class, function (Application $app) {
+            return new AbuseHeuristicsStage($app->make(ConfigManager::class)->getAbuseDetection());
+        });
+
+        $this->app->bind(GracePeriodStage::class, function (Application $app) {
+            return new GracePeriodStage($app->make(ConfigManager::class)->getGracePeriod());
+        });
+
+        $this->app->bind(ExpirationUsageStage::class, function (Application $app) {
+            return new ExpirationUsageStage($app->make(ConfigManager::class));
+        });
+
+        $this->app->bind(DomainCheckStage::class, function (Application $app) {
+            return new DomainCheckStage($app->make(ConfigManager::class)->getDomainValidation());
+        });
+
+        $this->app->bind(CreditsUsageStage::class, function (Application $app) {
+            return new CreditsUsageStage($app->make(ConfigManager::class)->getCredits());
+        });
+
+        $this->app->bind(UpdateWindowStage::class, function (Application $app) {
+            return new UpdateWindowStage($app->make(ConfigManager::class));
+        });
+
         $this->app->singleton(LicenseUsageValidationPipeline::class, function (Application $app) {
             return new LicenseUsageValidationPipeline([
                 $app->make(ResolveLicenseStage::class),

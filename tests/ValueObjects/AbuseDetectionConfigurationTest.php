@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 use Akira\LaravelLicense\ValueObjects\AbuseDetectionConfiguration;
 
-test('creates abuse detection configuration from array', function () {
-    $config = AbuseDetectionConfiguration::fromArray([
-        'enabled' => true,
-        'window_minutes' => 10,
-        'activation_threshold' => 10,
-        'events_to_monitor' => ['activated'],
-        'action_on_abuse' => 'log',
-    ]);
+test('creates abuse detection configuration from constructor', function () {
+    $config = new AbuseDetectionConfiguration(
+        enabled: true,
+        windowMinutes: 10,
+        activationThreshold: 10,
+        eventsToMonitor: ['activated'],
+        actionOnAbuse: 'log',
+    );
 
     expect($config->enabled)->toBeTrue()
         ->and($config->windowMinutes)->toBe(10)
@@ -21,7 +21,13 @@ test('creates abuse detection configuration from array', function () {
 });
 
 test('uses default values when not provided', function () {
-    $config = AbuseDetectionConfiguration::fromArray([]);
+    $config = new AbuseDetectionConfiguration(
+        enabled: true,
+        windowMinutes: 10,
+        activationThreshold: 10,
+        eventsToMonitor: ['activated'],
+        actionOnAbuse: 'log',
+    );
 
     expect($config->enabled)->toBeTrue()
         ->and($config->windowMinutes)->toBe(10)
@@ -31,41 +37,61 @@ test('uses default values when not provided', function () {
 });
 
 test('can disable abuse detection', function () {
-    $config = AbuseDetectionConfiguration::fromArray([
-        'enabled' => false,
-    ]);
+    $config = new AbuseDetectionConfiguration(
+        enabled: false,
+        windowMinutes: 10,
+        activationThreshold: 10,
+        eventsToMonitor: ['activated'],
+        actionOnAbuse: 'log',
+    );
 
     expect($config->enabled)->toBeFalse();
 });
 
 test('allows custom window minutes', function () {
-    $config = AbuseDetectionConfiguration::fromArray([
-        'window_minutes' => 30,
-    ]);
+    $config = new AbuseDetectionConfiguration(
+        enabled: true,
+        windowMinutes: 30,
+        activationThreshold: 10,
+        eventsToMonitor: ['activated'],
+        actionOnAbuse: 'log',
+    );
 
     expect($config->windowMinutes)->toBe(30);
 });
 
 test('allows custom activation threshold', function () {
-    $config = AbuseDetectionConfiguration::fromArray([
-        'activation_threshold' => 20,
-    ]);
+    $config = new AbuseDetectionConfiguration(
+        enabled: true,
+        windowMinutes: 10,
+        activationThreshold: 20,
+        eventsToMonitor: ['activated'],
+        actionOnAbuse: 'log',
+    );
 
     expect($config->activationThreshold)->toBe(20);
 });
 
 test('allows custom events to monitor', function () {
-    $config = AbuseDetectionConfiguration::fromArray([
-        'events_to_monitor' => ['activated', 'domain_changed'],
-    ]);
+    $config = new AbuseDetectionConfiguration(
+        enabled: true,
+        windowMinutes: 10,
+        activationThreshold: 10,
+        eventsToMonitor: ['activated', 'domain_changed'],
+        actionOnAbuse: 'log',
+    );
 
     expect($config->eventsToMonitor)->toBe(['activated', 'domain_changed']);
 });
 
 test('allows custom action on abuse', function () {
-    $config = AbuseDetectionConfiguration::fromArray([
-        'action_on_abuse' => 'suspend',
-    ]);
+    $config = new AbuseDetectionConfiguration(
+        enabled: true,
+        windowMinutes: 10,
+        activationThreshold: 10,
+        eventsToMonitor: ['activated'],
+        actionOnAbuse: 'suspend',
+    );
 
     expect($config->actionOnAbuse)->toBe('suspend');
 });

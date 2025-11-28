@@ -8,11 +8,13 @@ use Akira\LaravelLicense\Exceptions\LicenseExpiredException;
 use Akira\LaravelLicense\Exceptions\LicenseNotLoadedException;
 use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\Pipelines\Stages\ExpirationUsageStage;
+use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
 
 it('throws exception when license is not loaded', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
     $context = new LicenseContext(
         key: LicenseKey::fromString('TEST-KEY-1234'),
         domain: null
@@ -22,7 +24,8 @@ it('throws exception when license is not loaded', function () {
 })->throws(LicenseNotLoadedException::class);
 
 it('allows lifetime licenses without expiration check', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::LIFETIME->value,
@@ -42,7 +45,8 @@ it('allows lifetime licenses without expiration check', function () {
 });
 
 it('allows credits licenses without expiration check', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::CREDITS->value,
@@ -62,7 +66,8 @@ it('allows credits licenses without expiration check', function () {
 });
 
 it('allows non-expired annual licenses', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::ANNUAL->value,
@@ -83,7 +88,8 @@ it('allows non-expired annual licenses', function () {
 });
 
 it('throws exception for expired annual license without fallback', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::ANNUAL->value,
@@ -102,7 +108,8 @@ it('throws exception for expired annual license without fallback', function () {
 })->throws(LicenseExpiredException::class);
 
 it('allows expired annual license with fallback', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::ANNUAL->value,
@@ -123,7 +130,8 @@ it('allows expired annual license with fallback', function () {
 });
 
 it('allows expired subscription license within grace period', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::SUBSCRIPTION->value,
@@ -144,7 +152,8 @@ it('allows expired subscription license within grace period', function () {
 });
 
 it('throws exception for expired subscription license outside grace period', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::SUBSCRIPTION->value,
@@ -163,7 +172,8 @@ it('throws exception for expired subscription license outside grace period', fun
 })->throws(LicenseExpiredException::class);
 
 it('allows non-expired subscription license', function () {
-    $stage = new ExpirationUsageStage();
+    $configManager = resolve(ConfigManager::class);
+    $stage = new ExpirationUsageStage($configManager);
 
     $license = License::factory()->create([
         'type' => LicenseType::SUBSCRIPTION->value,

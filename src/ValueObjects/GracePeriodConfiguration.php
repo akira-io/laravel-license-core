@@ -14,20 +14,6 @@ final readonly class GracePeriodConfiguration
         public ?int $credits,
     ) {}
 
-    /**
-     * @param  array<string, mixed>  $config
-     */
-    public static function fromArray(array $config): self
-    {
-        return new self(
-            lifetime: $config['lifetime'] ?? null,
-            annual: $config['annual'] ?? null,
-            subscription: $config['subscription'] ?? 30,
-            trial: $config['trial'] ?? 7,
-            credits: $config['credits'] ?? null,
-        );
-    }
-
     public function getDaysForType(string $type): ?int
     {
         return match ($type) {

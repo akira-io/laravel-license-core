@@ -51,8 +51,10 @@ final class ConfigManager
         return config("license.{$key}", $default);
     }
 
+    /** @return array<string, mixed> */
     public function getAbuseDetectionConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.abuse_detection', [
             'enabled' => true,
             'window_minutes' => 10,
@@ -62,8 +64,10 @@ final class ConfigManager
         ]);
     }
 
+    /** @return array<string, mixed> */
     public function getGracePeriodConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.grace_period', [
             'lifetime' => null,
             'annual' => null,
@@ -73,34 +77,45 @@ final class ConfigManager
         ]);
     }
 
+    /** @return array<string, mixed> */
     public function getLicenseTypesConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.license_types', []);
     }
 
+    /** @return array<string, mixed> */
     public function getLicenseTypeConfig(string $type): array
     {
-        return $this->getLicenseTypesConfig()[$type] ?? [];
+        $config = $this->getLicenseTypesConfig();
+
+        return $config[$type] ?? [];
     }
 
+    /** @return array<string, mixed> */
     public function getDomainValidationConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.domain_validation', [
             'pattern_type' => 'glob',
             'case_sensitive' => false,
         ]);
     }
 
+    /** @return array<string, mixed> */
     public function getKeyGenerationConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.key_generation', [
             'prefix' => 'LIC',
             'format' => 'uuid',
         ]);
     }
 
+    /** @return array<string, mixed> */
     public function getPipelineConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.pipeline', [
             'usage' => [
                 'resolve_license',
@@ -122,8 +137,10 @@ final class ConfigManager
         ]);
     }
 
+    /** @return array<string, mixed> */
     public function getCreditsConfig(): array
     {
+        /** @var array<string, mixed> */
         return config('license.credits', [
             'allow_partial_consumption' => false,
             'allow_refund' => false,
@@ -132,36 +149,100 @@ final class ConfigManager
 
     public function getAbuseDetection(): AbuseDetectionConfiguration
     {
-        return AbuseDetectionConfiguration::fromArray($this->getAbuseDetectionConfig());
+        $config = $this->getAbuseDetectionConfig();
+
+        return new AbuseDetectionConfiguration(
+            enabled: (bool) ($config['enabled'] ?? true),
+            windowMinutes: (int) ($config['window_minutes'] ?? 10),
+            activationThreshold: (int) ($config['activation_threshold'] ?? 10),
+            eventsToMonitor: (array) ($config['events_to_monitor'] ?? ['activated']),
+            actionOnAbuse: (string) ($config['action_on_abuse'] ?? 'log'),
+        );
     }
 
     public function getGracePeriod(): GracePeriodConfiguration
     {
-        return GracePeriodConfiguration::fromArray($this->getGracePeriodConfig());
+        $config = $this->getGracePeriodConfig();
+
+        return new GracePeriodConfiguration(
+            lifetime: isset($config['lifetime']) && is_int($config['lifetime']) ? $config['lifetime'] : null,
+            annual: isset($config['annual']) && is_int($config['annual']) ? $config['annual'] : null,
+            subscription: isset($config['subscription']) && is_int($config['subscription']) ? $config['subscription'] : 30,
+            trial: isset($config['trial']) && is_int($config['trial']) ? $config['trial'] : 7,
+            credits: isset($config['credits']) && is_int($config['credits']) ? $config['credits'] : null,
+        );
     }
 
     public function getLicenseType(string $type): LicenseTypeConfiguration
     {
-        return LicenseTypeConfiguration::fromArray($this->getLicenseTypeConfig($type));
+        $config = $this->getLicenseTypeConfig($type);
+
+        return new LicenseTypeConfiguration(
+            requiresActivation: (bool) ($config['requires_activation'] ?? false),
+            requiresUpdateCheck: (bool) ($config['requires_update_check'] ?? false),
+            supportsGracePeriod: (bool) ($config['supports_grace_period'] ?? false),
+            fallbackOnExpiry: (bool) ($config['fallback_on_expiry'] ?? false),
+        );
     }
 
     public function getDomainValidation(): DomainValidationConfiguration
     {
-        return DomainValidationConfiguration::fromArray($this->getDomainValidationConfig());
+        $config = $this->getDomainValidationConfig();
+
+        return new DomainValidationConfiguration(
+            patternType: (string) ($config['pattern_type'] ?? 'glob'),
+            caseSensitive: (bool) ($config['case_sensitive'] ?? false),
+        );
     }
 
     public function getKeyGeneration(): KeyGenerationConfiguration
     {
-        return KeyGenerationConfiguration::fromArray($this->getKeyGenerationConfig());
+        $config = $this->getKeyGenerationConfig();
+
+        return new KeyGenerationConfiguration(
+            prefix: (string) ($config['prefix'] ?? 'LIC'),
+            format: (string) ($config['format'] ?? 'uuid'),
+        );
     }
 
     public function getPipeline(): PipelineConfiguration
     {
-        return PipelineConfiguration::fromArray($this->getPipelineConfig());
+        $config = $this->getPipelineConfig();
+
+        /** @var list<string> $usageStages */
+        $usageStages = is_array($config['usage'] ?? false) ? $config['usage'] : [
+            'resolve_license',
+            'status_check',
+            'expiration_usage',
+            'grace_period',
+            'domain_check',
+            'machine_check',
+            'credits_usage',
+            'abuse_heuristics',
+        ];
+
+        /** @var list<string> $updateStages */
+        $updateStages = is_array($config['update'] ?? false) ? $config['update'] : [
+            'resolve_license',
+            'status_check',
+            'expiration_usage',
+            'grace_period',
+            'update_window',
+        ];
+
+        return new PipelineConfiguration(
+            usageStages: $usageStages,
+            updateStages: $updateStages,
+        );
     }
 
     public function getCredits(): CreditsConfiguration
     {
-        return CreditsConfiguration::fromArray($this->getCreditsConfig());
+        $config = $this->getCreditsConfig();
+
+        return new CreditsConfiguration(
+            allowPartialConsumption: (bool) ($config['allow_partial_consumption'] ?? false),
+            allowRefund: (bool) ($config['allow_refund'] ?? false),
+        );
     }
 }

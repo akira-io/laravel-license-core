@@ -10,15 +10,4 @@ final readonly class CreditsConfiguration
         public bool $allowPartialConsumption,
         public bool $allowRefund,
     ) {}
-
-    /**
-     * @param  array<string, mixed>  $config
-     */
-    public static function fromArray(array $config): self
-    {
-        return new self(
-            allowPartialConsumption: (bool) ($config['allow_partial_consumption'] ?? false),
-            allowRefund: (bool) ($config['allow_refund'] ?? false),
-        );
-    }
 }

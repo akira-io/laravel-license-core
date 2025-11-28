@@ -8,10 +8,13 @@ use Akira\LaravelLicense\Contracts\LicenseValidatorStage;
 use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Exceptions\LicenseExpiredException;
 use Akira\LaravelLicense\Exceptions\LicenseNotLoadedException;
+use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 
-final class ExpirationUsageStage implements LicenseValidatorStage
+final readonly class ExpirationUsageStage implements LicenseValidatorStage
 {
+    public function __construct(private ConfigManager $configManager) {}
+
     public function __invoke(LicenseContext $context): LicenseContext
     {
         $license = $context->license ?? throw LicenseNotLoadedException::create();
@@ -30,7 +33,10 @@ final class ExpirationUsageStage implements LicenseValidatorStage
             return $context;
         }
 
-        if ($license->isExpired() && ! $license->inGracePeriod()) {
+        $gracePeriodConfig = $this->configManager->getGracePeriod();
+        $hasGracePeriod = $gracePeriodConfig->getDaysForType($type->value) !== null;
+
+        if ($license->isExpired() && ! ($hasGracePeriod && $license->inGracePeriod())) {
             throw LicenseExpiredException::create();
         }
 
