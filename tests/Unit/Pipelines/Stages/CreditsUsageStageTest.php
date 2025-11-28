@@ -9,13 +9,11 @@ use Akira\LaravelLicense\Exceptions\UsageNotConfiguredException;
 use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\Models\LicenseUsage;
 use Akira\LaravelLicense\Pipelines\Stages\CreditsUsageStage;
-use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
 
 test('passes context when license type is not credits', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 10);
+    $stage = new CreditsUsageStage(amountToConsume: 10);
 
     $license = License::factory()->create(['type' => LicenseType::LIFETIME->value]);
     $context = new LicenseContext(
@@ -30,8 +28,7 @@ test('passes context when license type is not credits', function () {
 });
 
 test('throws exception when license is not loaded', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 10);
+    $stage = new CreditsUsageStage(amountToConsume: 10);
 
     $context = new LicenseContext(
         key: LicenseKey::fromString('TEST-1234-5678-90AB'),
@@ -42,8 +39,7 @@ test('throws exception when license is not loaded', function () {
 })->throws(LicenseNotLoadedException::class);
 
 test('throws exception when credits license has no usage configured', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 10);
+    $stage = new CreditsUsageStage(amountToConsume: 10);
 
     $license = License::factory()->create(['type' => LicenseType::CREDITS->value]);
     $context = new LicenseContext(
@@ -56,8 +52,7 @@ test('throws exception when credits license has no usage configured', function (
 })->throws(UsageNotConfiguredException::class);
 
 test('throws exception when insufficient credits available', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 10);
+    $stage = new CreditsUsageStage(amountToConsume: 10);
 
     $license = License::factory()->create(['type' => LicenseType::CREDITS->value]);
     LicenseUsage::factory()->create([
@@ -76,8 +71,7 @@ test('throws exception when insufficient credits available', function () {
 })->throws(InsufficientCreditsException::class);
 
 test('passes when sufficient credits available', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 10);
+    $stage = new CreditsUsageStage(amountToConsume: 10);
 
     $license = License::factory()->create(['type' => LicenseType::CREDITS->value]);
     LicenseUsage::factory()->create([
@@ -98,8 +92,7 @@ test('passes when sufficient credits available', function () {
 });
 
 test('passes when amount to consume is zero', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 0);
+    $stage = new CreditsUsageStage(amountToConsume: 0);
 
     $license = License::factory()->create(['type' => LicenseType::CREDITS->value]);
     LicenseUsage::factory()->create([
@@ -120,8 +113,7 @@ test('passes when amount to consume is zero', function () {
 });
 
 test('passes when exactly enough credits available', function () {
-    $configManager = resolve(ConfigManager::class);
-    $stage = new CreditsUsageStage(creditsConfig: $configManager->getCredits(), amountToConsume: 10);
+    $stage = new CreditsUsageStage(amountToConsume: 10);
 
     $license = License::factory()->create(['type' => LicenseType::CREDITS->value]);
     LicenseUsage::factory()->create([

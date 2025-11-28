@@ -37,7 +37,7 @@ final class LaravelLicenseServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $configManager = $this->app->singleton('license.config-manager', ConfigManager::class);
+        $this->app->singleton('license.config-manager', ConfigManager::class);
 
         $this->app->bind(AbuseHeuristicsStage::class, function (Application $app) {
             return new AbuseHeuristicsStage($app->make(ConfigManager::class)->getAbuseDetection());
@@ -55,8 +55,8 @@ final class LaravelLicenseServiceProvider extends PackageServiceProvider
             return new DomainCheckStage($app->make(ConfigManager::class)->getDomainValidation());
         });
 
-        $this->app->bind(CreditsUsageStage::class, function (Application $app) {
-            return new CreditsUsageStage($app->make(ConfigManager::class)->getCredits());
+        $this->app->bind(CreditsUsageStage::class, function () {
+            return new CreditsUsageStage();
         });
 
         $this->app->bind(UpdateWindowStage::class, function (Application $app) {

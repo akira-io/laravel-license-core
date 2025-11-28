@@ -89,7 +89,8 @@ final class ConfigManager
     {
         $config = $this->getLicenseTypesConfig();
 
-        return $config[$type] ?? [];
+        /** @var array<string, mixed> */
+        return is_array($config[$type] ?? null) ? $config[$type] : [];
     }
 
     /** @return array<string, mixed> */
@@ -151,12 +152,20 @@ final class ConfigManager
     {
         $config = $this->getAbuseDetectionConfig();
 
+        $windowMinutes = $config['window_minutes'] ?? 10;
+        $activationThreshold = $config['activation_threshold'] ?? 10;
+        $eventsToMonitor = $config['events_to_monitor'] ?? ['activated'];
+        $actionOnAbuse = $config['action_on_abuse'] ?? 'log';
+
+        /** @var list<string> $events */
+        $events = is_array($eventsToMonitor) ? array_values($eventsToMonitor) : ['activated'];
+
         return new AbuseDetectionConfiguration(
             enabled: (bool) ($config['enabled'] ?? true),
-            windowMinutes: (int) ($config['window_minutes'] ?? 10),
-            activationThreshold: (int) ($config['activation_threshold'] ?? 10),
-            eventsToMonitor: (array) ($config['events_to_monitor'] ?? ['activated']),
-            actionOnAbuse: (string) ($config['action_on_abuse'] ?? 'log'),
+            windowMinutes: is_int($windowMinutes) ? $windowMinutes : 10,
+            activationThreshold: is_int($activationThreshold) ? $activationThreshold : 10,
+            eventsToMonitor: $events,
+            actionOnAbuse: is_string($actionOnAbuse) ? $actionOnAbuse : 'log',
         );
     }
 
@@ -189,9 +198,12 @@ final class ConfigManager
     {
         $config = $this->getDomainValidationConfig();
 
+        $patternType = $config['pattern_type'] ?? 'glob';
+        $caseSensitive = $config['case_sensitive'] ?? false;
+
         return new DomainValidationConfiguration(
-            patternType: (string) ($config['pattern_type'] ?? 'glob'),
-            caseSensitive: (bool) ($config['case_sensitive'] ?? false),
+            patternType: is_string($patternType) ? $patternType : 'glob',
+            caseSensitive: (bool) $caseSensitive,
         );
     }
 
@@ -199,9 +211,12 @@ final class ConfigManager
     {
         $config = $this->getKeyGenerationConfig();
 
+        $prefix = $config['prefix'] ?? 'LIC';
+        $format = $config['format'] ?? 'uuid';
+
         return new KeyGenerationConfiguration(
-            prefix: (string) ($config['prefix'] ?? 'LIC'),
-            format: (string) ($config['format'] ?? 'uuid'),
+            prefix: is_string($prefix) ? $prefix : 'LIC',
+            format: is_string($format) ? $format : 'uuid',
         );
     }
 
