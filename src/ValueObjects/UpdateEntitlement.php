@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Akira\LaravelLicense\ValueObjects;
 
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
 
 final readonly class UpdateEntitlement
 {

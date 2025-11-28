@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'exceptions' => [
         'activation_limit_reached' => 'Limite de ativacoes atingido para esta licenca.',

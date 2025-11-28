@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Akira\LaravelLicense\Pipelines\Stages;
 
-
 use Akira\LaravelLicense\Contracts\LicenseValidatorStage;
 use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Exceptions\LicenseExpiredException;

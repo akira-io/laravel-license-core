@@ -34,10 +34,15 @@ final readonly class CreditsUsageStage implements LicenseValidatorStage
             throw UsageNotConfiguredException::forCreditsLicense();
         }
 
-        $amount = new UsageAmount($usage->limit, $usage->consumed_units);
+        /** @var int $limit */
+        $limit = $usage->limit;
+        /** @var int $consumedUnits */
+        $consumedUnits = $usage->consumed_units;
+
+        $amount = new UsageAmount($limit, $consumedUnits);
 
         if (! $amount->hasEnough($this->amountToConsume)) {
-            throw InsufficientCreditsException::create();
+            throw InsufficientCreditsException::create($this->amountToConsume, $amount->remaining());
         }
 
         return $context;

@@ -12,4 +12,14 @@ final class LicenseExpiredException extends LicenseException
             'date' => $date ?? now()->toDateString(),
         ]));
     }
+
+    public static function withGracePeriod(): self
+    {
+        return new self(__('laravel-license::license.exceptions.license_expired_grace_period'));
+    }
+
+    public static function annual(): self
+    {
+        return new self(__('laravel-license::license.exceptions.annual_license_expired'));
+    }
 }

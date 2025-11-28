@@ -6,6 +6,4 @@ namespace Akira\LaravelLicense\Exceptions;
 
 use RuntimeException;
 
-abstract class LicenseException extends RuntimeException
-{
-}
+abstract class LicenseException extends RuntimeException {}

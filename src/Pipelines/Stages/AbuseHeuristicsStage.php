@@ -27,11 +27,11 @@ final class AbuseHeuristicsStage implements LicenseValidatorStage
         if ($events >= 10) {
             LicenseEvent::query()
                 ->create([
-                'license_id' => $license->id,
-                'type' => LicenseEventType::ABUSE_DETECTED->value,
-                'payload' => ['activations_last_10min' => $events],
-                'created_at' => now(),
-            ]);
+                    'license_id' => $license->id,
+                    'type' => LicenseEventType::ABUSE_DETECTED->value,
+                    'payload' => ['activations_last_10min' => $events],
+                    'created_at' => now(),
+                ]);
         }
 
         return $context;

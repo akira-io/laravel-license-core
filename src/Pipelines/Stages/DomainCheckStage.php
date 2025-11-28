@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Akira\LaravelLicense\Pipelines\Stages;
 
-
 use Akira\LaravelLicense\Contracts\LicenseValidatorStage;
 use Akira\LaravelLicense\Exceptions\DomainBlockedException;
 use Akira\LaravelLicense\Exceptions\DomainNotAllowedException;
@@ -21,8 +20,11 @@ final class DomainCheckStage implements LicenseValidatorStage
             return $context;
         }
 
-        $meta = $license->meta() ?? [];
+        /** @var array<string, mixed> $meta */
+        $meta = $license->meta ?? [];
+        /** @var array<int, string> $allowed */
         $allowed = $meta['allowed_domains'] ?? [];
+        /** @var array<int, string> $blocked */
         $blocked = $meta['blocked_domains'] ?? [];
         $domain = $context->domain->host;
 
@@ -32,7 +34,7 @@ final class DomainCheckStage implements LicenseValidatorStage
             }
         }
 
-        if (empty($allowed)) {
+        if ($allowed === []) {
             return $context;
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akira\LaravelLicense\Actions;
 
 use Akira\LaravelLicense\Exceptions\UsageNotConfiguredException;
@@ -20,6 +22,7 @@ final readonly class ConsumeCreditsAction
         }
 
         $usage->increment('consumed_units', $amount);
+
         return true;
     }
 }

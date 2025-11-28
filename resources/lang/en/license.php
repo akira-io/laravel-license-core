@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'exceptions' => [
         'activation_limit_reached' => 'Activation limit reached for this license.',
@@ -10,6 +12,7 @@ return [
         'license_not_found' => 'License not found.',
         'license_not_loaded' => 'License must be loaded before performing this operation.',
         'license_expired' => 'License has expired on :date.',
+        'annual_license_expired' => 'Annual license has expired.',
         'license_revoked' => 'License has been revoked.',
         'license_suspended' => 'License is currently suspended.',
         'usage_not_configured' => 'Usage tracking is not configured for this license.',

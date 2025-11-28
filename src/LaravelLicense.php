@@ -14,6 +14,7 @@ use Akira\LaravelLicense\ValueObjects\DomainName;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
 use Akira\LaravelLicense\ValueObjects\MachineFingerprint;
 use Carbon\CarbonInterface;
+use InvalidArgumentException;
 use Throwable;
 
 final readonly class LaravelLicense
@@ -34,8 +35,8 @@ final readonly class LaravelLicense
     ): bool {
         try {
             $licenseKey = LicenseKey::fromString($key);
-            $machineFingerprint = MachineFingerprint::fromRaw($machine);
-            $domainName = DomainName::fromUrlOrHost($domain);
+            $machineFingerprint = MachineFingerprint::fromRaw($machine) ?? throw new InvalidArgumentException('Machine fingerprint is required');
+            $domainName = $domain ? DomainName::fromUrlOrHost($domain) : null;
 
             $context = $this->validateUsage->handle(
                 key: $licenseKey,
@@ -62,14 +63,13 @@ final readonly class LaravelLicense
     public function validateUpdate(
         string $key,
         CarbonInterface $releaseDate,
-        string $machine,
         ?string $domain = null,
-
+        ?string $machine = null,
     ): bool {
         try {
             $licenseKey = LicenseKey::fromString($key);
-            $machineFingerprint = MachineFingerprint::fromRaw($machine);
-            $domainName = DomainName::fromUrlOrHost($domain);
+            $machineFingerprint = $machine ? MachineFingerprint::fromRaw($machine) : null;
+            $domainName = $domain ? DomainName::fromUrlOrHost($domain) : null;
 
             $this->validateUpdate->handle(
                 $licenseKey,

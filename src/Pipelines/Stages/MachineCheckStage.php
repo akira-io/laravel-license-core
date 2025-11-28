@@ -15,11 +15,11 @@ final class MachineCheckStage implements LicenseValidatorStage
     {
         $license = $context->license ?? throw LicenseNotLoadedException::create();
 
-        if (! $context->machine) {
+        if (! $context->machineFingerprint) {
             return $context;
         }
 
-        $hash = $context->machine->hash;
+        $hash = $context->machineFingerprint->hash;
 
         $existing = $license->activations()
             ->where('machine_hash', $hash)

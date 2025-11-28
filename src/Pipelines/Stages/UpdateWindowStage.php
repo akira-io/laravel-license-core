@@ -10,32 +10,27 @@ use Akira\LaravelLicense\Exceptions\LicenseNotLoadedException;
 use Akira\LaravelLicense\Exceptions\VersionNotCoveredException;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 use Akira\LaravelLicense\ValueObjects\UpdateEntitlement;
-use Carbon\CarbonInterface;
 
 final readonly class UpdateWindowStage implements LicenseValidatorStage
 {
     public function __invoke(LicenseContext $context): LicenseContext
     {
         $license = $context->license ?? throw LicenseNotLoadedException::create();
-        
+
         $type = $license->typeEnum();
 
         if ($type === LicenseType::LIFETIME || $type === LicenseType::CREDITS) {
             return $context;
         }
 
-        if ($context->releaseDate === null) {
-            throw new VersionNotCoveredException();
-        }
+        throw_if($context->releaseDate === null, VersionNotCoveredException::class);
 
         $entitlement = new UpdateEntitlement(
             updatesUntil: $license->expires_at,
             fallbackMode: $license->fallback,
         );
 
-        if (! $entitlement->canInstall($context->releaseDate)) {
-            throw new VersionNotCoveredException();
-        }
+        throw_unless($entitlement->canInstall($context->releaseDate), VersionNotCoveredException::class);
 
         return $context;
     }

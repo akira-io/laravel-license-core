@@ -62,5 +62,11 @@ final class LaravelLicenseServiceProvider extends PackageServiceProvider
         $this->app->singleton(LaravelLicense::class);
     }
 
-
+    public function packageBooted(): void
+    {
+        $helpersFile = __DIR__.'/Support/helpers.php';
+        if (file_exists($helpersFile)) {
+            require_once $helpersFile;
+        }
+    }
 }

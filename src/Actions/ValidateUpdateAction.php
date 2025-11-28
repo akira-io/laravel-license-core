@@ -9,6 +9,7 @@ use Akira\LaravelLicense\ValueObjects\DomainName;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
 use Akira\LaravelLicense\ValueObjects\MachineFingerprint;
+use Illuminate\Support\Facades\Date;
 
 final readonly class ValidateUpdateAction
 {
@@ -20,7 +21,7 @@ final readonly class ValidateUpdateAction
             key: $key,
             domain: $domain,
             machineFingerprint: $machine,
-            releaseDate: $releaseDate,
+            releaseDate: Date::parse($releaseDate),
         );
 
         return $this->pipeline->process($ctx);
