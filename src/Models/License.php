@@ -29,6 +29,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property CarbonInterface|null $grace_ends_at
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
+ *
+ * @method static LicenseFactory factory()
  */
 final class License extends Model
 {
@@ -51,7 +53,6 @@ final class License extends Model
     /** @return array<string, string> */
     public function casts(): array
     {
-
         return [
             'expires_at' => 'datetime',
             'grace_ends_at' => 'datetime',

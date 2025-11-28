@@ -114,7 +114,7 @@ it('maintains relationships after rotation', function () {
 
     $fresh = $license->fresh();
     expect($fresh->activations->pluck('id')->sort()->values()->toArray())
-        ->toEqual(collect($activationIds)->sort()->values()->toArray())
+        ->toEqual(collect($activationIds)->sort()->values()->all())
         ->and($fresh->activations)->toHaveCount(2);
 });
 

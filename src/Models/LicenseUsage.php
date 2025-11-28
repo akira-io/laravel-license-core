@@ -12,9 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property int $id
+ * @property int $license_id
  * @property int $consumed_units
  * @property int $limit
- * @property-read CarbonInterface|null $created_at
+ * @property CarbonInterface $created_at
+ *
+ * @method static LicenseUsageFactory factory()
  */
 final class LicenseUsage extends Model
 {
@@ -46,7 +50,6 @@ final class LicenseUsage extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-
         return [
             'consumed_units' => 'integer',
             'limit' => 'integer',

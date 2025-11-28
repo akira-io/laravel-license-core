@@ -6,11 +6,21 @@ namespace Akira\LaravelLicense\Models;
 
 use Akira\LaravelLicense\Database\Factories\LicenseEventFactory;
 use Akira\LaravelLicense\Support\ConfigManager;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $license_id
+ * @property string $type
+ * @property array<string, mixed>|null $payload
+ * @property CarbonInterface $created_at
+ *
+ * @method static LicenseEventFactory factory()
+ */
 final class LicenseEvent extends Model
 {
     /** @use HasFactory<LicenseEventFactory> */
@@ -39,7 +49,6 @@ final class LicenseEvent extends Model
     /** @return array<string, class-string> */
     protected function casts(): array
     {
-
         return [
             'payload' => AsArrayObject::class,
             'created_at' => 'datetime',
