@@ -8,7 +8,7 @@ namespace Akira\LaravelLicense\ValueObjects;
 final readonly class AbuseDetectionConfiguration
 {
     /**
-     * @param list<string> $eventsToMonitor
+     * @param  list<string>  $eventsToMonitor
      */
     public function __construct(
         public bool $enabled,
@@ -19,7 +19,7 @@ final readonly class AbuseDetectionConfiguration
     ) {}
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public static function fromArray(array $config): self
     {

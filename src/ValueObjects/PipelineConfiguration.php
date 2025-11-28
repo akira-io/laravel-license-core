@@ -8,8 +8,8 @@ namespace Akira\LaravelLicense\ValueObjects;
 final readonly class PipelineConfiguration
 {
     /**
-     * @param list<string> $usageStages
-     * @param list<string> $updateStages
+     * @param  list<string>  $usageStages
+     * @param  list<string>  $updateStages
      */
     public function __construct(
         public array $usageStages,
@@ -17,7 +17,7 @@ final readonly class PipelineConfiguration
     ) {}
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public static function fromArray(array $config): self
     {
