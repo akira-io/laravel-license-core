@@ -7,10 +7,13 @@ namespace Akira\LaravelLicense\Pipelines\Stages;
 use Akira\LaravelLicense\Contracts\LicenseValidatorStage;
 use Akira\LaravelLicense\Enums\LicenseEventType;
 use Akira\LaravelLicense\Models\LicenseEvent;
+use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 
-final class AbuseHeuristicsStage implements LicenseValidatorStage
+final readonly class AbuseHeuristicsStage implements LicenseValidatorStage
 {
+    public function __construct(private ConfigManager $config) {}
+
     public function __invoke(LicenseContext $context): LicenseContext
     {
         $license = $context->license;
@@ -19,17 +22,23 @@ final class AbuseHeuristicsStage implements LicenseValidatorStage
             return $context;
         }
 
+        $abuseConfig = $this->config->getAbuseDetection();
+
+        if (! $abuseConfig->enabled) {
+            return $context;
+        }
+
         $events = $license->events()
-            ->where('type', LicenseEventType::ACTIVATED->value)
-            ->where('created_at', '>=', now()->subMinutes(10))
+            ->whereIn('type', $abuseConfig->eventsToMonitor)
+            ->where('created_at', '>=', now()->subMinutes($abuseConfig->windowMinutes))
             ->count();
 
-        if ($events >= 10) {
+        if ($events >= $abuseConfig->activationThreshold) {
             LicenseEvent::query()
                 ->create([
                     'license_id' => $license->id,
                     'type' => LicenseEventType::ABUSE_DETECTED->value,
-                    'payload' => ['activations_last_10min' => $events],
+                    'payload' => ['activations' => $events],
                     'created_at' => now(),
                 ]);
         }
