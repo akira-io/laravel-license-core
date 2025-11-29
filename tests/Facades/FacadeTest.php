@@ -52,7 +52,7 @@ it('can create license via static facade', function () {
         graceEndsAt: null,
     );
 
-    $license = License::createLicense($data);
+    $license = License::create($data);
 
     expect($license)->toBeInstanceOf(Akira\LaravelLicense\Models\License::class)
         ->and($license->key)->toBe('STATIC-FACADE-KEY');
@@ -72,7 +72,7 @@ it('can create license with auto key via static facade', function () {
         graceEndsAt: null,
     );
 
-    $license = License::createLicenseWithAutoKey($data);
+    $license = License::createWithAutoKey($data);
 
     expect($license)->toBeInstanceOf(Akira\LaravelLicense\Models\License::class)
         ->and($license->key)->not->toBeEmpty();
@@ -96,7 +96,7 @@ it('can update license via static facade', function () {
         graceEndsAt: $license->grace_ends_at,
     );
 
-    $updated = License::updateLicense($license, $data);
+    $updated = License::update($license, $data);
 
     expect($updated->max_activations)->toBe(10);
 });
@@ -120,7 +120,7 @@ it('can update license by key via static facade', function () {
         graceEndsAt: $license->grace_ends_at,
     );
 
-    $updated = License::updateLicenseByKey('FACADE-UPDATE-KEY', $data);
+    $updated = License::updateByKey('FACADE-UPDATE-KEY', $data);
 
     expect($updated)->not->toBeNull()
         ->and($updated->max_activations)->toBe(8);

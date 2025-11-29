@@ -213,7 +213,7 @@ test('create license via facade', function () {
         graceEndsAt: null,
     );
 
-    $license = $service->createLicense($data);
+    $license = $service->create($data);
 
     expect($license)->toBeInstanceOf(License::class)
         ->and($license->key)->toBe('TEST-FACADE-KEY')
@@ -236,7 +236,7 @@ test('create license with auto key via facade', function () {
         graceEndsAt: null,
     );
 
-    $license = $service->createLicenseWithAutoKey($data);
+    $license = $service->createWithAutoKey($data);
 
     expect($license)->toBeInstanceOf(License::class)
         ->and($license->key)->not->toBeEmpty()
@@ -264,7 +264,7 @@ test('update license via facade', function () {
         graceEndsAt: $license->grace_ends_at,
     );
 
-    $updated = $service->updateLicense($license, $data);
+    $updated = $service->update($license, $data);
 
     expect($updated->status)->toBe(LicenseStatus::SUSPENDED->value)
         ->and($updated->max_activations)->toBe(15);
@@ -291,7 +291,7 @@ test('update license by key via facade', function () {
         graceEndsAt: $license->grace_ends_at,
     );
 
-    $updated = $service->updateLicenseByKey('UPDATE-BY-KEY', $data);
+    $updated = $service->updateByKey('UPDATE-BY-KEY', $data);
 
     expect($updated)->not->toBeNull()
         ->and($updated->max_activations)->toBe(20);
@@ -313,7 +313,7 @@ test('update license by key returns null for invalid key', function () {
         graceEndsAt: null,
     );
 
-    $result = $service->updateLicenseByKey('INVALID-KEY', $data);
+    $result = $service->updateByKey('INVALID-KEY', $data);
 
     expect($result)->toBeNull();
 });

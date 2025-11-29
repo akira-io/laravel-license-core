@@ -173,16 +173,16 @@ $data = new LicenseData(
     graceEndsAt: null,
 );
 
-$license = License::createLicense($data);
+$license = License::create($data);
 
 // Create with auto-generated key
-$license = License::createLicenseWithAutoKey($data);
+$license = License::createWithAutoKey($data);
 
 // Update existing license
-$updated = License::updateLicense($license, $data);
+$updated = License::update($license, $data);
 
 // Update by key (returns null if not found)
-$updated = License::updateLicenseByKey('XXXX-XXXX-XXXX-XXXX', $data);
+$updated = License::updateByKey('XXXX-XXXX-XXXX-XXXX', $data);
 ```
 
 ## Example: Simple Usage
@@ -196,7 +196,7 @@ use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Enums\LicenseStatus;
 
 // Quick create with auto-generated key
-$license = License::createLicenseWithAutoKey(
+$license = License::createWithAutoKey(
     new LicenseData(
         key: '',
         type: LicenseType::ANNUAL,
@@ -212,7 +212,7 @@ $license = License::createLicenseWithAutoKey(
 );
 
 // Quick update by key
-$updated = License::updateLicenseByKey(
+$updated = License::updateByKey(
     $license->key,
     new LicenseData(
         key: $license->key,
@@ -352,7 +352,7 @@ class LicenseController extends Controller
             'expires_at' => 'nullable|date',
         ]);
 
-        $license = License::createLicenseWithAutoKey(
+        $license = License::createWithAutoKey(
             new LicenseData(
                 key: '',
                 type: LicenseType::from($validated['type']),
@@ -382,7 +382,7 @@ class LicenseController extends Controller
 
         $license = \Akira\LaravelLicense\Models\License::where('key', $key)->firstOrFail();
 
-        $updated = License::updateLicenseByKey(
+        $updated = License::updateByKey(
             $key,
             new LicenseData(
                 key: $license->key,

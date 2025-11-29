@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Akira\LaravelLicense\Facades\License;
 
-test('license helper returns LaravelLicense facade instance', function () {
+test('license helper returns License facade instance', function () {
     $result = license();
 
     expect($result)->toBeInstanceOf(License::class);

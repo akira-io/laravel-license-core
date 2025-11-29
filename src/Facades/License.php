@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool validateUpdate(string $key, CarbonInterface $releaseDate, ?string $domain = null, ?string $machine = null)
  * @method static bool consumeCredits(string $key, int $amount)
  * @method static string|null rotateKey(string $key)
- * @method static LicenseModel createLicense(LicenseData $data)
- * @method static LicenseModel createLicenseWithAutoKey(LicenseData $data)
- * @method static LicenseModel updateLicense(LicenseModel $license, LicenseData $data)
- * @method static LicenseModel|null updateLicenseByKey(string $key, LicenseData $data)
+ * @method static LicenseModel create(LicenseData $data)
+ * @method static LicenseModel createWithAutoKey(LicenseData $data)
+ * @method static LicenseModel update(LicenseModel $license, LicenseData $data)
+ * @method static LicenseModel|null updateByKey(string $key, LicenseData $data)
  *
  * @see LaravelLicense
  */

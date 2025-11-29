@@ -111,22 +111,22 @@ final readonly class LaravelLicense
         }
     }
 
-    public function createLicense(LicenseData $data): License
+    public function create(LicenseData $data): License
     {
         return $this->createLicense->handle($data);
     }
 
-    public function createLicenseWithAutoKey(LicenseData $data): License
+    public function createWithAutoKey(LicenseData $data): License
     {
         return $this->createLicense->handleWithAutoKey($data);
     }
 
-    public function updateLicense(License $license, LicenseData $data): License
+    public function update(License $license, LicenseData $data): License
     {
         return $this->updateLicense->handle($license, $data);
     }
 
-    public function updateLicenseByKey(string $key, LicenseData $data): ?License
+    public function updateByKey(string $key, LicenseData $data): ?License
     {
         try {
             $license = $this->findLicenseByKey(LicenseKey::fromString($key));

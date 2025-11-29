@@ -82,7 +82,7 @@ use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Enums\LicenseStatus;
 
 // Create a license with auto-generated key
-$license = License::createLicenseWithAutoKey(
+$license = License::createWithAutoKey(
     new LicenseData(
         key: '',
         type: LicenseType::ANNUAL,
