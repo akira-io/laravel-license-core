@@ -46,6 +46,13 @@ final class ConfigManager
         return config()->string("license.models.{$key}", '');
     }
 
+    /** @return class-string */
+    public function getLicenseModel(): string
+    {
+        /** @var class-string */
+        return $this->getModelClass('license');
+    }
+
     public function get(string $key, mixed $default = null): mixed
     {
         return config("license.{$key}", $default);

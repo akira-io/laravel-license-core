@@ -20,7 +20,7 @@ final readonly class ActivateLicenseAction
             ->create([
                 'domain' => $domain?->host,
                 'machine_hash' => $machineFingerPrint->hash,
-                'ip_address' => request()->ip(),
+                'ip' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
     }
