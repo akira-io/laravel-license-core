@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-use Akira\LaravelLicense\Facades\LaravelLicense;
+use Akira\LaravelLicense\Facades\License;
 
 test('license helper returns LaravelLicense facade instance', function () {
     $result = license();
 
-    expect($result)->toBeInstanceOf(LaravelLicense::class);
+    expect($result)->toBeInstanceOf(License::class);
 });
 
 test('license helper returns instance from container', function () {
     $helper = license();
 
-    expect($helper)->toBeInstanceOf(LaravelLicense::class)
-        ->and(app(LaravelLicense::class))->toBeInstanceOf(LaravelLicense::class);
+    expect($helper)->toBeInstanceOf(License::class)
+        ->and(app(License::class))->toBeInstanceOf(License::class);
 });
 
 test('license helper function exists', function () {

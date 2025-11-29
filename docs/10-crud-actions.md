@@ -149,6 +149,86 @@ $array = [
 $data = LicenseData::fromArray($array);
 ```
 
+## Using the Facade
+
+All CRUD operations are also available through the `License` facade for convenience:
+
+```php
+use Akira\LaravelLicense\Facades\License;
+use Akira\LaravelLicense\ValueObjects\LicenseData;
+use Akira\LaravelLicense\Enums\LicenseType;
+use Akira\LaravelLicense\Enums\LicenseStatus;
+
+// Create a license
+$data = new LicenseData(
+    key: 'XXXX-XXXX-XXXX-XXXX',
+    type: LicenseType::ANNUAL,
+    status: LicenseStatus::ACTIVE,
+    maxActivations: 5,
+    maxSeats: 10,
+    fallback: false,
+    scopes: ['feature:advanced'],
+    meta: ['client' => 'Acme Corp'],
+    expiresAt: now()->addYear(),
+    graceEndsAt: null,
+);
+
+$license = License::createLicense($data);
+
+// Create with auto-generated key
+$license = License::createLicenseWithAutoKey($data);
+
+// Update existing license
+$updated = License::updateLicense($license, $data);
+
+// Update by key (returns null if not found)
+$updated = License::updateLicenseByKey('XXXX-XXXX-XXXX-XXXX', $data);
+```
+
+## Example: Simple Usage
+
+Here's the simplest way to use the CRUD operations with the facade:
+
+```php
+use Akira\LaravelLicense\Facades\License;
+use Akira\LaravelLicense\ValueObjects\LicenseData;
+use Akira\LaravelLicense\Enums\LicenseType;
+use Akira\LaravelLicense\Enums\LicenseStatus;
+
+// Quick create with auto-generated key
+$license = License::createLicenseWithAutoKey(
+    new LicenseData(
+        key: '',
+        type: LicenseType::ANNUAL,
+        status: LicenseStatus::ACTIVE,
+        maxActivations: 5,
+        maxSeats: 10,
+        fallback: false,
+        scopes: ['feature:premium'],
+        meta: ['client' => 'Acme Corp'],
+        expiresAt: now()->addYear(),
+        graceEndsAt: null,
+    )
+);
+
+// Quick update by key
+$updated = License::updateLicenseByKey(
+    $license->key,
+    new LicenseData(
+        key: $license->key,
+        type: LicenseType::from($license->type),
+        status: LicenseStatus::SUSPENDED, // Suspend the license
+        maxActivations: $license->max_activations,
+        maxSeats: $license->max_seats,
+        fallback: $license->fallback,
+        scopes: $license->scopes?->getArrayCopy(),
+        meta: $license->meta,
+        expiresAt: $license->expires_at,
+        graceEndsAt: $license->grace_ends_at,
+    )
+);
+```
+
 ## Example: API Controller
 
 Here's a practical example of using these actions in a Laravel controller:
@@ -239,6 +319,88 @@ class LicenseController extends Controller
         $updatedLicense = $this->updateAction->handle($license, $data);
 
         return response()->json($updatedLicense);
+    }
+}
+```
+
+### Using Facade in Controller
+
+You can also use the facade directly for simpler code:
+
+```php
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use Akira\LaravelLicense\Facades\License;
+use Akira\LaravelLicense\Enums\LicenseStatus;
+use Akira\LaravelLicense\Enums\LicenseType;
+use Akira\LaravelLicense\ValueObjects\LicenseData;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class LicenseController extends Controller
+{
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'type' => 'required|string',
+            'max_activations' => 'required|integer',
+            'max_seats' => 'required|integer',
+            'scopes' => 'nullable|array',
+            'meta' => 'nullable|array',
+            'expires_at' => 'nullable|date',
+        ]);
+
+        $license = License::createLicenseWithAutoKey(
+            new LicenseData(
+                key: '',
+                type: LicenseType::from($validated['type']),
+                status: LicenseStatus::ACTIVE,
+                maxActivations: $validated['max_activations'],
+                maxSeats: $validated['max_seats'],
+                fallback: false,
+                scopes: $validated['scopes'] ?? null,
+                meta: $validated['meta'] ?? null,
+                expiresAt: isset($validated['expires_at']) 
+                    ? carbon($validated['expires_at']) 
+                    : null,
+                graceEndsAt: null,
+            )
+        );
+
+        return response()->json($license, 201);
+    }
+
+    public function update(Request $request, string $key): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => 'sometimes|string',
+            'max_activations' => 'sometimes|integer',
+            'max_seats' => 'sometimes|integer',
+        ]);
+
+        $license = \Akira\LaravelLicense\Models\License::where('key', $key)->firstOrFail();
+
+        $updated = License::updateLicenseByKey(
+            $key,
+            new LicenseData(
+                key: $license->key,
+                type: LicenseType::from($license->type),
+                status: isset($validated['status']) 
+                    ? LicenseStatus::from($validated['status']) 
+                    : LicenseStatus::from($license->status),
+                maxActivations: $validated['max_activations'] ?? $license->max_activations,
+                maxSeats: $validated['max_seats'] ?? $license->max_seats,
+                fallback: $license->fallback,
+                scopes: $license->scopes?->getArrayCopy(),
+                meta: $license->meta,
+                expiresAt: $license->expires_at,
+                graceEndsAt: $license->grace_ends_at,
+            )
+        );
+
+        return response()->json($updated);
     }
 }
 ```

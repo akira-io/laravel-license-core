@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Akira\LaravelLicense\Facades\LaravelLicense;
+use Akira\LaravelLicense\Facades\License;
 
 if (! function_exists('license')) {
-    function license(): LaravelLicense
+    function license(): License
     {
-        return app(LaravelLicense::class);
+        return app(License::class);
     }
 }

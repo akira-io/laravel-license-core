@@ -6,11 +6,14 @@ namespace Akira\LaravelLicense;
 
 use Akira\LaravelLicense\Actions\ActivateLicenseAction;
 use Akira\LaravelLicense\Actions\ConsumeCreditsAction;
+use Akira\LaravelLicense\Actions\CreateLicenseAction;
 use Akira\LaravelLicense\Actions\RotateLicenseKeyAction;
+use Akira\LaravelLicense\Actions\UpdateLicenseAction;
 use Akira\LaravelLicense\Actions\ValidateUpdateAction;
 use Akira\LaravelLicense\Actions\ValidateUsageAction;
 use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\ValueObjects\DomainName;
+use Akira\LaravelLicense\ValueObjects\LicenseData;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
 use Akira\LaravelLicense\ValueObjects\MachineFingerprint;
 use Carbon\CarbonInterface;
@@ -25,6 +28,8 @@ final readonly class LaravelLicense
         private ActivateLicenseAction $activate,
         private ConsumeCreditsAction $consumeCredits,
         private RotateLicenseKeyAction $rotateKey,
+        private CreateLicenseAction $createLicense,
+        private UpdateLicenseAction $updateLicense,
     ) {}
 
     public function validateUsage(
@@ -101,6 +106,32 @@ final readonly class LaravelLicense
             $license = $this->findLicenseByKey(LicenseKey::fromString($key));
 
             return $this->rotateKey->handle($license);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    public function createLicense(LicenseData $data): License
+    {
+        return $this->createLicense->handle($data);
+    }
+
+    public function createLicenseWithAutoKey(LicenseData $data): License
+    {
+        return $this->createLicense->handleWithAutoKey($data);
+    }
+
+    public function updateLicense(License $license, LicenseData $data): License
+    {
+        return $this->updateLicense->handle($license, $data);
+    }
+
+    public function updateLicenseByKey(string $key, LicenseData $data): ?License
+    {
+        try {
+            $license = $this->findLicenseByKey(LicenseKey::fromString($key));
+
+            return $this->updateLicense->handle($license, $data);
         } catch (Throwable) {
             return null;
         }

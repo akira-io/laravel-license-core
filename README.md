@@ -71,7 +71,61 @@ return [
 
 ## Usage
 
-### Creating a License
+### Using the License Facade
+
+The simplest way to work with licenses is through the `License` facade:
+
+```php
+use Akira\LaravelLicense\Facades\License;
+use Akira\LaravelLicense\ValueObjects\LicenseData;
+use Akira\LaravelLicense\Enums\LicenseType;
+use Akira\LaravelLicense\Enums\LicenseStatus;
+
+// Create a license with auto-generated key
+$license = License::createLicenseWithAutoKey(
+    new LicenseData(
+        key: '',
+        type: LicenseType::ANNUAL,
+        status: LicenseStatus::ACTIVE,
+        maxActivations: 5,
+        maxSeats: 10,
+        fallback: false,
+        scopes: ['feature:premium'],
+        meta: ['customer_email' => 'john@example.com'],
+        expiresAt: now()->addYear(),
+        graceEndsAt: null,
+    )
+);
+
+// Validate license usage
+$isValid = License::validateUsage(
+    key: $license->key,
+    machine: 'unique-machine-fingerprint',
+    domain: 'example.com',
+    activate: true
+);
+
+// Validate license for updates
+$canUpdate = License::validateUpdate(
+    key: $license->key,
+    releaseDate: now(),
+    domain: 'example.com',
+    machine: 'unique-machine-fingerprint'
+);
+
+// Consume credits
+$success = License::consumeCredits(
+    key: $license->key,
+    amount: 10
+);
+
+// Rotate license key
+$newKey = License::rotateKey($license->key);
+```
+
+### Creating a License Directly
+
+You can also create licenses using the model:
 
 ```php
 use Akira\LaravelLicense\Models\License;
@@ -372,7 +426,7 @@ The package includes **438 tests** with **100% code coverage** across all compon
 
 - **Commands**: LaravelLicenseCommand
 - **Enums**: LicenseType, LicenseStatus, LicenseEventType
-- **Facades**: LaravelLicense
+- **Facades**: License
 - **Models**: License, LicenseActivation, LicenseEvent, LicenseUsage
 - **Support**: ConfigManager, KeyGenerator
 - **Value Objects**: DomainName, LicenseContext, LicenseKey, LicenseMeta, LicenseScopes, MachineFingerprint, UpdateEntitlement, UsageAmount
