@@ -1,19 +1,12 @@
 # Usage Guide
 
-This guide provides comprehensive examples of using Laravel License in real-world scenarios.
-
-## Table of Contents
-
-1. [Creating Licenses](#creating-licenses)
-2. [Managing Activations](#managing-activations)
-3. [Tracking Usage](#tracking-usage)
-4. [Event Logging](#event-logging)
-5. [License Validation](#license-validation)
-6. [Common Patterns](#common-patterns)
+Practical examples and common patterns for using Laravel License Core.
 
 ## Creating Licenses
 
-### Basic License Creation
+### Lifetime License
+
+Never expires, single activation optional:
 
 ```php
 use Akira\LaravelLicense\Models\License;
@@ -21,91 +14,158 @@ use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Enums\LicenseStatus;
 
 $license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::ANNUAL->value,
-    'status' => LicenseStatus::ACTIVE->value,
+    'key' => 'LIC-' . Str::uuid(),
+    'type' => LicenseType::LIFETIME,
+    'status' => LicenseStatus::ACTIVE,
+    'max_activations' => 1,
+    'max_seats' => 1,
+    'expires_at' => null,  // Never expires
+    'meta' => [
+        'customer_email' => 'john@example.com',
+        'plan' => 'lifetime',
+    ],
+]);
+```
+
+### Annual License
+
+Year-based, requires activation:
+
+```php
+$license = License::create([
+    'key' => 'LIC-' . Str::uuid(),
+    'type' => LicenseType::ANNUAL,
+    'status' => LicenseStatus::ACTIVE,
     'max_activations' => 5,
     'max_seats' => 10,
-]);
-```
-
-### Creating Different License Types
-
-#### Lifetime License
-
-```php
-$license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::LIFETIME->value,
-    'status' => LicenseStatus::ACTIVE->value,
-    'max_activations' => 1,
-    'max_seats' => 1,
-    'expires_at' => null, // Never expires
-]);
-```
-
-#### Trial License
-
-```php
-$license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::TRIAL->value,
-    'status' => LicenseStatus::ACTIVE->value,
-    'max_activations' => 1,
-    'max_seats' => 1,
-    'expires_at' => now()->addDays(30),
-]);
-```
-
-#### Subscription License with Grace Period
-
-```php
-$license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::SUBSCRIPTION->value,
-    'status' => LicenseStatus::ACTIVE->value,
-    'max_activations' => 3,
-    'max_seats' => 5,
-    'expires_at' => now()->addMonth(),
-    'grace_ends_at' => now()->addMonth()->addDays(7),
-]);
-```
-
-### Adding Metadata
-
-```php
-$license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::ANNUAL->value,
-    'status' => LicenseStatus::ACTIVE->value,
+    'expires_at' => now()->addYear(),
     'meta' => [
-        'customer_id' => 12345,
-        'customer_email' => 'customer@example.com',
-        'plan_name' => 'Professional',
-        'features' => ['api_access', 'priority_support'],
+        'customer_email' => 'john@example.com',
+        'plan' => 'professional',
         'purchase_date' => now()->toDateString(),
     ],
 ]);
-
-// Access encrypted metadata
-$customerId = $license->meta['customer_id'];
 ```
 
-### With Scopes
+### Subscription License
+
+Month-based with grace period:
 
 ```php
 $license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::ANNUAL->value,
-    'status' => LicenseStatus::ACTIVE->value,
-    'scopes' => ['read', 'write', 'admin'],
+    'key' => 'LIC-' . Str::uuid(),
+    'type' => LicenseType::SUBSCRIPTION,
+    'status' => LicenseStatus::ACTIVE,
+    'max_activations' => 3,
+    'max_seats' => 5,
+    'expires_at' => now()->addMonth(),
+    'grace_ends_at' => now()->addMonth()->addDays(30),
+    'meta' => [
+        'customer_email' => 'john@example.com',
+        'plan' => 'starter',
+        'billing_cycle' => 'monthly',
+    ],
+]);
+```
+
+### Trial License
+
+Limited trial with grace period:
+
+```php
+$license = License::create([
+    'key' => 'LIC-' . Str::uuid(),
+    'type' => LicenseType::TRIAL,
+    'status' => LicenseStatus::ACTIVE,
+    'max_activations' => 1,
+    'max_seats' => 1,
+    'expires_at' => now()->addDays(30),
+    'grace_ends_at' => now()->addDays(37),  // 7 days grace
+    'meta' => [
+        'customer_email' => 'trial@example.com',
+        'plan' => 'trial',
+        'trial_starts_at' => now(),
+    ],
+]);
+```
+
+### Credits License
+
+Credit-pool based:
+
+```php
+$license = License::create([
+    'key' => 'LIC-' . Str::uuid(),
+    'type' => LicenseType::CREDITS,
+    'status' => LicenseStatus::ACTIVE,
+    'max_activations' => 0,  // N/A for credits
+    'expires_at' => null,     // Never expires
+    'meta' => [
+        'customer_email' => 'john@example.com',
+        'plan' => 'pay-as-you-go',
+    ],
 ]);
 
-// Check scopes
-if (in_array('admin', iterator_to_array($license->scopes))) {
-    // User has admin scope
+// Create usage record
+$license->usages()->create([
+    'consumed_units' => 0,
+    'limit' => 10000,  // 10k credits available
+]);
+```
+
+---
+
+## License Validation
+
+### Basic Validation
+
+```php
+use Akira\LaravelLicense\Exceptions\LicenseException;
+
+try {
+    license()->validateUsage(
+        key: request()->header('X-License-Key'),
+        machine: hash('sha256', gethostname()),
+        activate: true  // Create activation record
+    );
+    // License is valid!
+} catch (LicenseException $e) {
+    return response()->json(['error' => $e->getMessage()], 403);
 }
 ```
+
+### With Domain Validation
+
+```php
+try {
+    license()->validateUsage(
+        key: 'LIC-xxx',
+        machine: hash('sha256', gethostname()),
+        domain: request()->getHost(),  // Validate domain
+        activate: true
+    );
+} catch (DomainNotAllowedException) {
+    return response()->json(['error' => 'Domain not allowed'], 403);
+}
+```
+
+### Update Validation
+
+```php
+try {
+    license()->validateUpdate(
+        key: 'LIC-xxx',
+        releaseDate: $softwareVersion->released_at,
+        domain: request()->getHost(),
+        machine: hash('sha256', gethostname())
+    );
+    // Can install this version
+} catch (VersionNotCoveredException) {
+    return response()->json(['error' => 'Version not covered'], 403);
+}
+```
+
+---
 
 ## Managing Activations
 
@@ -114,7 +174,6 @@ if (in_array('admin', iterator_to_array($license->scopes))) {
 ```php
 use Akira\LaravelLicense\Models\LicenseActivation;
 
-// Basic activation
 $activation = LicenseActivation::create([
     'license_id' => $license->id,
     'domain' => request()->getHost(),
@@ -124,201 +183,119 @@ $activation = LicenseActivation::create([
 ]);
 ```
 
-### Checking Activation Limits
+### Check Activation Limits
 
 ```php
-function canActivate(License $license): bool
-{
-    $currentActivations = $license->activations()->count();
-    return $currentActivations < $license->max_activations;
-}
+$currentCount = $license->activations()->count();
+$canActivate = $currentCount < $license->max_activations;
 
-if (!canActivate($license)) {
-    throw new \Exception('Maximum activations reached');
+if (!$canActivate) {
+    return response()->json([
+        'error' => 'Max activations reached',
+        'current' => $currentCount,
+        'max' => $license->max_activations,
+    ], 403);
 }
 ```
 
-### Finding Existing Activation
+### Find Existing Activation
 
 ```php
-// Check if already activated on this machine
-$existingActivation = LicenseActivation::where('license_id', $license->id)
+$activation = $license->activations()
     ->where('machine_hash', $machineHash)
     ->first();
 
-if ($existingActivation) {
-    // Already activated
-    return $existingActivation;
-}
-```
-
-### Deactivating
-
-```php
-// Deactivate specific activation
-$activation->delete();
-
-// Deactivate by machine hash
-LicenseActivation::where('license_id', $license->id)
-    ->where('machine_hash', $machineHash)
-    ->delete();
-
-// Deactivate all
-$license->activations()->delete();
-```
-
-### Complete Activation Flow
-
-```php
-use Akira\LaravelLicense\Models\{License, LicenseActivation, LicenseEvent};
-use Akira\LaravelLicense\Enums\LicenseEventType;
-
-function activateLicense(string $licenseKey, string $machineHash): LicenseActivation
-{
-    $license = License::where('key', $licenseKey)->firstOrFail();
-    
-    // Validate license
-    if ($license->status !== LicenseStatus::ACTIVE->value) {
-        throw new \Exception('License is not active');
-    }
-    
-    if ($license->isExpired() && !$license->inGracePeriod()) {
-        throw new \Exception('License has expired');
-    }
-    
-    // Check if already activated
-    $existing = LicenseActivation::where('license_id', $license->id)
-        ->where('machine_hash', $machineHash)
-        ->first();
-        
-    if ($existing) {
-        return $existing;
-    }
-    
-    // Check activation limit
-    if ($license->activations()->count() >= $license->max_activations) {
-        throw new \Exception('Maximum activations reached');
-    }
-    
-    // Create activation
-    $activation = DB::transaction(function () use ($license, $machineHash) {
-        $activation = LicenseActivation::create([
-            'license_id' => $license->id,
-            'domain' => request()->getHost(),
-            'machine_hash' => $machineHash,
-            'ip' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
-        
-        // Log event
-        LicenseEvent::create([
-            'license_id' => $license->id,
-            'type' => LicenseEventType::ACTIVATED->value,
-            'payload' => [
-                'activation_id' => $activation->id,
-                'domain' => $activation->domain,
-            ],
-            'created_at' => now(),
-        ]);
-        
-        return $activation;
-    });
-    
+if ($activation) {
+    // Machine already activated
     return $activation;
 }
 ```
 
-## Tracking Usage
-
-### Creating Usage Record
+### Deactivate
 
 ```php
-use Akira\LaravelLicense\Models\LicenseUsage;
+// Delete specific activation
+$activation->delete();
 
-$usage = LicenseUsage::create([
-    'license_id' => $license->id,
+// Deactivate all for a license
+$license->activations()->delete();
+
+// Deactivate on specific machine
+$license->activations()
+    ->where('machine_hash', $machineHash)
+    ->delete();
+```
+
+---
+
+## Tracking Usage & Credits
+
+### Create Usage Record
+
+```php
+$usage = $license->usages()->create([
     'consumed_units' => 0,
     'limit' => 10000,
 ]);
 ```
 
-### Consuming Units
+### Consume Credits
 
 ```php
-// Increment consumed units
-$usage->increment('consumed_units', 100);
+// Using facade
+license()->consumeCredits(
+    key: $license->key,
+    amount: 100  // Consume 100 units
+);
 
-// Or update directly
-$usage->update([
-    'consumed_units' => $usage->consumed_units + 100
-]);
+// Manual update
+$usage->increment('consumed_units', 100);
 
 // Check remaining
 $remaining = $usage->remaining();
 ```
 
-### Complete Usage Flow
+### Monitor Usage
 
 ```php
-use Akira\LaravelLicense\Models\{LicenseUsage, LicenseEvent};
-use Akira\LaravelLicense\Enums\LicenseEventType;
+$usage = $license->usages()->first();
 
-function consumeUnits(License $license, int $units): void
-{
-    $usage = LicenseUsage::firstOrCreate(
-        ['license_id' => $license->id],
-        ['consumed_units' => 0, 'limit' => 10000]
-    );
-    
-    // Check if enough units available
-    if ($usage->remaining() < $units) {
-        throw new \Exception('Insufficient units available');
-    }
-    
-    DB::transaction(function () use ($usage, $units, $license) {
-        // Consume units
-        $usage->increment('consumed_units', $units);
-        
-        // Log event
-        LicenseEvent::create([
-            'license_id' => $license->id,
-            'type' => LicenseEventType::USAGE_CONSUMED->value,
-            'payload' => [
-                'units_consumed' => $units,
-                'remaining' => $usage->remaining(),
-                'timestamp' => now()->toIso8601String(),
-            ],
-            'created_at' => now(),
-        ]);
-        
-        // Warning if running low
-        if ($usage->remaining() < 100) {
-            // Notify user about low credits
-            event(new LowCreditsWarning($license, $usage));
-        }
-    });
+$stats = [
+    'total' => $usage->limit,
+    'consumed' => $usage->consumed_units,
+    'remaining' => $usage->remaining(),
+    'percent_used' => ($usage->consumed_units / $usage->limit) * 100,
+];
+
+if ($stats['remaining'] < 100) {
+    // Send low credit warning
+    Mail::send(new LowCreditsWarning($license, $usage));
 }
 ```
 
-### Resetting Usage
+### Refund Credits
 
 ```php
-// Reset usage for a new period
+// Refund 100 credits
 $usage->update([
-    'consumed_units' => 0,
-]);
-
-// Or create new usage record
-LicenseUsage::create([
-    'license_id' => $license->id,
-    'consumed_units' => 0,
-    'limit' => 10000,
+    'consumed_units' => DB::raw('consumed_units - 100'),
 ]);
 ```
 
+### Reset Usage
+
+```php
+// Reset for new billing period
+$usage->update([
+    'consumed_units' => 0,
+]);
+```
+
+---
+
 ## Event Logging
 
-### Logging Different Events
+### Logging Events
 
 ```php
 use Akira\LaravelLicense\Models\LicenseEvent;
@@ -327,164 +304,210 @@ use Akira\LaravelLicense\Enums\LicenseEventType;
 // License created
 LicenseEvent::create([
     'license_id' => $license->id,
-    'type' => LicenseEventType::CREATED->value,
+    'type' => LicenseEventType::CREATED,
     'payload' => [
         'created_by' => auth()->id(),
-        'ip' => request()->ip(),
+        'plan' => 'professional',
     ],
-    'created_at' => now(),
 ]);
 
 // License activated
 LicenseEvent::create([
     'license_id' => $license->id,
-    'type' => LicenseEventType::ACTIVATED->value,
+    'type' => LicenseEventType::ACTIVATED,
     'payload' => [
-        'activation_id' => $activation->id,
-        'domain' => $activation->domain,
+        'domain' => 'api.example.com',
+        'machine_hash' => $machineHash,
     ],
-    'created_at' => now(),
 ]);
 
-// License expired
+// Credits consumed
 LicenseEvent::create([
     'license_id' => $license->id,
-    'type' => LicenseEventType::EXPIRED->value,
+    'type' => LicenseEventType::USAGE_CONSUMED,
     'payload' => [
-        'expired_at' => $license->expires_at->toIso8601String(),
+        'units_consumed' => 100,
+        'remaining' => 9900,
     ],
-    'created_at' => now(),
-]);
-
-// Abuse detected
-LicenseEvent::create([
-    'license_id' => $license->id,
-    'type' => LicenseEventType::ABUSE_DETECTED->value,
-    'payload' => [
-        'reason' => 'Multiple simultaneous activations',
-        'details' => '10 activations in 5 minutes',
-        'ip_addresses' => ['192.168.1.1', '10.0.0.1'],
-    ],
-    'created_at' => now(),
 ]);
 ```
 
 ### Querying Events
 
 ```php
-// Get all events for a license
-$events = $license->events()->orderBy('created_at', 'desc')->get();
+// Get all events
+$events = $license->events()
+    ->orderBy('created_at', 'desc')
+    ->get();
 
-// Get recent events
-$recentEvents = $license->events()
+// Get specific type
+$activations = $license->events()
+    ->where('type', LicenseEventType::ACTIVATED)
+    ->get();
+
+// Recent events
+$recent = $license->events()
     ->where('created_at', '>', now()->subDay())
     ->get();
 
-// Get specific event type
-$activations = $license->events()
-    ->where('type', LicenseEventType::ACTIVATED->value)
-    ->get();
-
-// Count events by type
-$eventCounts = $license->events()
+// Event count by type
+$counts = $license->events()
     ->select('type', DB::raw('count(*) as count'))
     ->groupBy('type')
     ->get();
 ```
 
-## License Validation
+---
 
-### Complete Validation Function
+## Domain Validation
+
+### Configure Domain Restrictions
 
 ```php
-use Akira\LaravelLicense\Models\License;
-use Akira\LaravelLicense\Enums\LicenseStatus;
+$license = License::create([
+    'key' => 'LIC-xxx',
+    'type' => LicenseType::ANNUAL,
+    'meta' => [
+        'allowed_domains' => [
+            'example.com',
+            '*.example.com',
+        ],
+        'blocked_domains' => [
+            'spam.example.com',
+        ],
+    ],
+]);
+```
 
-function validateLicense(string $licenseKey): array
-{
-    $license = License::where('key', $licenseKey)->first();
-    
-    if (!$license) {
-        return [
-            'valid' => false,
-            'reason' => 'License not found'
-        ];
-    }
-    
-    // Check status
-    if ($license->status !== LicenseStatus::ACTIVE->value) {
-        return [
-            'valid' => false,
-            'reason' => "License is {$license->status}"
-        ];
-    }
-    
-    // Check expiration
-    if ($license->isExpired()) {
-        if ($license->inGracePeriod()) {
-            return [
-                'valid' => true,
-                'warning' => 'License expired but in grace period',
-                'grace_ends_at' => $license->grace_ends_at
-            ];
-        }
-        
-        return [
-            'valid' => false,
-            'reason' => 'License has expired'
-        ];
-    }
-    
-    // Check activation limit
-    $activationCount = $license->activations()->count();
-    if ($activationCount >= $license->max_activations) {
-        return [
-            'valid' => false,
-            'reason' => 'Maximum activations reached'
-        ];
-    }
-    
-    return [
-        'valid' => true,
-        'license' => $license,
-        'activations_remaining' => $license->max_activations - $activationCount
-    ];
+### Glob Pattern (Default)
+
+```php
+// config/license.php
+'domain_validation' => [
+    'pattern_type' => 'glob',
+    'case_sensitive' => false,
+],
+
+// Patterns
+'allowed_domains' => [
+    'example.com',              // Exact
+    '*.example.com',            // All subdomains
+    '*.prod.example.com',       // Nested subdomains
+    'api-*.example.com',        // Wildcard prefix
+],
+```
+
+### Exact Pattern
+
+```php
+'domain_validation' => [
+    'pattern_type' => 'exact',
+    'case_sensitive' => false,
+],
+
+'allowed_domains' => [
+    'api.example.com',
+    'admin.example.com',
+],
+```
+
+### Regex Pattern
+
+```php
+'domain_validation' => [
+    'pattern_type' => 'regex',
+    'case_sensitive' => false,
+],
+
+'allowed_domains' => [
+    '^(api|admin)\.example\.com$',      // Multiple specific
+    '^.*\.prod\.example\.com$',         // Production env
+    '^client-\d+\.example\.com$',       // Dynamic clients
+],
+```
+
+### Validate Domain
+
+```php
+try {
+    license()->validateUsage(
+        key: $license->key,
+        domain: request()->getHost(),
+        activate: true
+    );
+} catch (DomainBlockedException) {
+    return response()->json(['error' => 'Domain is blocked'], 403);
+} catch (DomainNotAllowedException) {
+    return response()->json(['error' => 'Domain not allowed'], 403);
 }
 ```
 
-### Validation Middleware
+---
+
+## Middleware Implementation
+
+### Create Middleware
 
 ```php
+// app/Http/Middleware/ValidateLicense.php
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Akira\LaravelLicense\Exceptions\LicenseException;
 
 class ValidateLicense
 {
     public function handle(Request $request, Closure $next)
     {
         $licenseKey = $request->header('X-License-Key');
-        
+
         if (!$licenseKey) {
             return response()->json(['error' => 'License key required'], 401);
         }
-        
-        $validation = validateLicense($licenseKey);
-        
-        if (!$validation['valid']) {
-            return response()->json([
-                'error' => $validation['reason']
-            ], 403);
+
+        try {
+            license()->validateUsage(
+                key: $licenseKey,
+                machine: $this->getMachineHash($request),
+                domain: $request->getHost(),
+                activate: true
+            );
+
+            $request->attributes->add(['license_key' => $licenseKey]);
+            return $next($request);
+        } catch (LicenseException $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
         }
-        
-        // Add license to request
-        $request->attributes->add(['license' => $validation['license']]);
-        
-        return $next($request);
+    }
+
+    private function getMachineHash(Request $request): string
+    {
+        return hash('sha256', gethostname() . '|' . $request->ip());
     }
 }
 ```
+
+### Register Middleware
+
+```php
+// app/Http/Kernel.php
+protected $routeMiddleware = [
+    'validate.license' => \App\Http\Middleware\ValidateLicense::class,
+];
+```
+
+### Use on Routes
+
+```php
+// routes/api.php
+Route::middleware('validate.license')->group(function () {
+    Route::get('/resource', ResourceController::class);
+    Route::post('/action', ActionController::class);
+});
+```
+
+---
 
 ## Common Patterns
 
@@ -494,24 +517,23 @@ class ValidateLicense
 function renewLicense(License $license, int $months = 12): void
 {
     DB::transaction(function () use ($license, $months) {
-        $newExpiresAt = $license->expires_at 
+        $newExpiry = $license->expires_at
             ? $license->expires_at->addMonths($months)
             : now()->addMonths($months);
-            
+
         $license->update([
-            'expires_at' => $newExpiresAt,
-            'grace_ends_at' => $newExpiresAt->copy()->addWeek(),
-            'status' => LicenseStatus::ACTIVE->value,
+            'expires_at' => $newExpiry,
+            'grace_ends_at' => $newExpiry->copy()->addDays(30),
+            'status' => LicenseStatus::ACTIVE,
         ]);
-        
+
         LicenseEvent::create([
             'license_id' => $license->id,
-            'type' => 'renewed',
+            'type' => LicenseEventType::CREATED,  // Use appropriate type
             'payload' => [
-                'renewed_at' => now()->toIso8601String(),
-                'new_expiry' => $newExpiresAt->toIso8601String(),
+                'renewed_at' => now(),
+                'new_expiry' => $newExpiry,
             ],
-            'created_at' => now(),
         ]);
     });
 }
@@ -524,23 +546,23 @@ function suspendLicense(License $license, string $reason): void
 {
     DB::transaction(function () use ($license, $reason) {
         $license->update([
-            'status' => LicenseStatus::SUSPENDED->value,
+            'status' => LicenseStatus::SUSPENDED,
         ]);
-        
+
         LicenseEvent::create([
             'license_id' => $license->id,
-            'type' => 'suspended',
+            'type' => LicenseEventType::SUSPENDED,  // Use actual enum
             'payload' => [
                 'reason' => $reason,
                 'suspended_by' => auth()->id(),
+                'suspended_at' => now(),
             ],
-            'created_at' => now(),
         ]);
     });
 }
 ```
 
-### Upgrade License
+### License Upgrade
 
 ```php
 function upgradeLicense(License $license, array $newLimits): void
@@ -549,31 +571,80 @@ function upgradeLicense(License $license, array $newLimits): void
         'max_activations' => $license->max_activations,
         'max_seats' => $license->max_seats,
     ];
-    
+
     DB::transaction(function () use ($license, $newLimits, $oldLimits) {
         $license->update($newLimits);
-        
+
         LicenseEvent::create([
             'license_id' => $license->id,
             'type' => 'upgraded',
             'payload' => [
                 'old_limits' => $oldLimits,
                 'new_limits' => $newLimits,
+                'upgraded_at' => now(),
             ],
-            'created_at' => now(),
         ]);
     });
 }
 ```
 
-## Next Steps
+### Check if License is Valid
 
-Learn more about:
+```php
+function isLicenseValid(License $license): bool
+{
+    if ($license->status !== LicenseStatus::ACTIVE->value) {
+        return false;
+    }
 
-- [Enums](06-enums.md) - Available enumerations
-- [Factories](07-factories.md) - Testing with factories
-- [Testing](08-testing.md) - Writing tests
+    if ($license->isExpired() && !$license->inGracePeriod()) {
+        return false;
+    }
+
+    return true;
+}
+```
 
 ---
 
-**Navigation**: [Previous: Models](04-models.md) | [Next: Enums](06-enums.md)
+## Error Handling Examples
+
+```php
+use Akira\LaravelLicense\Exceptions\{
+    LicenseException,
+    LicenseNotFoundException,
+    LicenseExpiredException,
+    ActivationLimitReachedException,
+    InsufficientCreditsException,
+    DomainNotAllowedException,
+};
+
+try {
+    license()->validateUsage(key: 'LIC-xxx', ...);
+} catch (LicenseNotFoundException) {
+    Log::warning('Invalid license key provided');
+    return response()->json(['error' => 'Invalid key'], 404);
+} catch (LicenseExpiredException) {
+    return response()->json([
+        'error' => 'License expired',
+        'action' => 'renew',
+    ], 403);
+} catch (ActivationLimitReachedException) {
+    return response()->json([
+        'error' => 'Max activations reached',
+        'deactivate_url' => route('licenses.deactivate'),
+    ], 403);
+} catch (DomainNotAllowedException) {
+    return response()->json([
+        'error' => 'Domain not allowed',
+        'support_url' => 'https://support.example.com',
+    ], 403);
+} catch (LicenseException $e) {
+    Log::error('License validation failed: ' . $e->getMessage());
+    return response()->json(['error' => 'Validation failed'], 403);
+}
+```
+
+---
+
+**Previous**: [Pipelines](04-pipelines.md) | **Next**: [Value Objects](06-value-objects.md)

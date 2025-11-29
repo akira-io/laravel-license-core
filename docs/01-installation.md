@@ -1,6 +1,6 @@
 # Installation
 
-This guide will walk you through installing and setting up Laravel License in your application.
+This guide will walk you through installing and setting up Laravel License Core in your application.
 
 ## Requirements
 
@@ -33,9 +33,7 @@ Publish the package migrations to your application:
 php artisan vendor:publish --tag="laravel-license-core-migrations"
 ```
 
-This will create four migration files in your `database/migrations` directory:
-
-- `create_laravel_license_table.php` - Creates all required tables
+This will create a migration file in your `database/migrations` directory that sets up all required tables.
 
 ### Step 3: Run Migrations
 
@@ -61,6 +59,16 @@ php artisan vendor:publish --tag="laravel-license-core-config"
 ```
 
 This creates `config/license.php` in your application.
+
+### Step 5: Publish Translations (Optional)
+
+To customize error messages in different languages:
+
+```bash
+php artisan vendor:publish --tag="laravel-license-core-translations"
+```
+
+This publishes language files to `resources/lang/{locale}/`.
 
 ## Verifying Installation
 
@@ -88,11 +96,12 @@ Try creating a license to confirm everything works:
 use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\Enums\LicenseType;
 use Akira\LaravelLicense\Enums\LicenseStatus;
+use Illuminate\Support\Str;
 
 $license = License::create([
-    'key' => \Illuminate\Support\Str::uuid(),
-    'type' => LicenseType::TRIAL->value,
-    'status' => LicenseStatus::ACTIVE->value,
+    'key' => 'LIC-' . Str::uuid(),
+    'type' => LicenseType::TRIAL,
+    'status' => LicenseStatus::ACTIVE,
 ]);
 
 echo "License created with key: {$license->key}";
@@ -248,12 +257,12 @@ php artisan cache:clear
 
 ## Next Steps
 
-Now that you have Laravel License installed, proceed to:
+Now that you have Laravel License Core installed, proceed to:
 
-- [Configuration](03-configuration.md) - Learn about configuration options
-- [Models](04-models.md) - Understand the data models
+- [Configuration](02-configuration.md) - Learn about configuration options
+- [Models](03-models.md) - Understand the data models
 - [Usage Guide](05-usage-guide.md) - Start using the package
 
 ---
 
-**Navigation**: [Previous: Introduction](01-introduction.md) | [Next: Configuration](03-configuration.md)
+**Previous**: [Index](00-index.md) | **Next**: [Configuration](02-configuration.md)
