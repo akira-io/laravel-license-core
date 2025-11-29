@@ -476,40 +476,103 @@ license()->validateUsage(
 
 ```php
 'key_generation' => [
-    'prefix' => 'LIC',    // Prefix for generated keys
-    'format' => 'uuid',   // 'uuid' or 'sequential'
+    'prefix' => 'LIC',      // Prefix for generated keys
+    'format' => 'uuid',     // 'uuid' or 'sequential'
 ],
 ```
 
-### Default Format
+### Available Formats
 
-Generated keys look like:
+#### UUID Format (Default)
+
+Generates unique UUID v4 keys:
 
 ```
 LIC-550e8400-e29b-41d4-a716-446655440000
 ```
 
+Configuration:
+```php
+'key_generation' => [
+    'prefix' => 'LIC',
+    'format' => 'uuid',  // Default
+],
+```
+
+#### Sequential Format
+
+Generates keys with timestamp and random suffix for sequential ordering:
+
+```
+LIC-1704067200AbCd1234
+```
+
+Composition:
 - **Prefix**: LIC
-- **Format**: UUID v4
+- **Timestamp**: 10 digits (Unix timestamp)
+- **Random**: 8 random alphanumeric characters
+
+Configuration:
+```php
+'key_generation' => [
+    'prefix' => 'LIC',
+    'format' => 'sequential',  // Timestamp-based format
+],
+```
 
 ### Customizing Key Format
 
 ```php
 'key_generation' => [
-    'prefix' => 'PRO',  // Custom prefix for pro licenses
-    'format' => 'uuid',
+    'prefix' => 'PRO',      // Custom prefix
+    'format' => 'uuid',     // Format type
 ],
-// Results in: PRO-{uuid}
 ```
 
+Results in:
+- UUID: `PRO-{uuid}`
+- Sequential: `PRO-{timestamp}{random}`
+
 ### Key Generation in Code
+
+The `KeyGenerator` is automatically configured based on your configuration:
 
 ```php
 use Akira\LaravelLicense\Support\KeyGenerator;
 
+// Inject via constructor or resolve from container
 $generator = app(KeyGenerator::class);
-$key = $generator->generate();  // LIC-{uuid}
+$key = $generator->generate();  // Based on configuration
 ```
+
+In controllers or classes:
+
+```php
+final class LicenseController
+{
+    public function __construct(private KeyGenerator $generator) {}
+
+    public function create(): void
+    {
+        $newKey = $this->generator->generate();
+        // Use the generated key
+    }
+}
+```
+
+The generator respects the `key_generation` configuration automatically.
+
+### Use Cases
+
+**UUID Format**:
+- Random, non-sequential licenses
+- Better for security/randomness
+- Easier to distribute
+
+**Sequential Format**:
+- Ordered license tracking
+- Easier to identify license creation time
+- Better for analytics and reporting
 
 ---
 
@@ -560,9 +623,58 @@ Order matters! Each stage depends on previous ones:
 4. **grace_period** - Apply grace period
 5. **update_window** - Check version coverage
 
+### How Pipeline Loading Works
+
+The service provider automatically loads pipeline stages based on configuration:
+
+1. **Stage Mapping Registry** - Maps stage names to class names
+2. **Configuration-Driven** - Reads stage names from `config/license.php`
+3. **Dynamic Resolution** - Stages are resolved from the service container
+4. **Type Safety** - Full type checking with PHPStan
+
+The internal stage mapping:
+
+```php
+[
+    'resolve_license' => ResolveLicenseStage::class,
+    'status_check' => StatusCheckStage::class,
+    'expiration_usage' => ExpirationUsageStage::class,
+    'grace_period' => GracePeriodStage::class,
+    'domain_check' => DomainCheckStage::class,
+    'machine_check' => MachineCheckStage::class,
+    'credits_usage' => CreditsUsageStage::class,
+    'abuse_heuristics' => AbuseHeuristicsStage::class,
+    'update_window' => UpdateWindowStage::class,
+]
+```
+
 ### Customizing Pipeline
 
-Skip or reorder stages:
+Reorder stages to change validation order:
+
+```php
+'pipeline' => [
+    'usage' => [
+        'resolve_license',
+        'status_check',
+        'credits_usage',          // Check credits first
+        'expiration_usage',       // Then check expiration
+        'grace_period',
+        'domain_check',
+        'machine_check',
+        'abuse_heuristics',
+    ],
+    'update' => [
+        'resolve_license',
+        'status_check',
+        'update_window',          // Check updates first
+        'expiration_usage',
+        'grace_period',
+    ],
+],
+```
+
+Skip stages by removing them:
 
 ```php
 'pipeline' => [
@@ -570,35 +682,83 @@ Skip or reorder stages:
         'resolve_license',
         'status_check',
         'expiration_usage',
-        // Skip domain_check
+        // 'domain_check' removed - skip domain validation
         'machine_check',
         'credits_usage',
-        // Skip abuse_heuristics
+        // 'abuse_heuristics' removed - skip abuse detection
     ],
 ],
 ```
 
 ### Custom Stages
 
-Add custom validation stages:
+Add custom validation stages by:
+
+1. Creating your stage class implementing `LicenseValidatorStage`
+2. Registering it in the stage mapping
+3. Adding it to the pipeline configuration
+
+Example custom stage:
+
+```php
+// app/Pipelines/Stages/CustomValidationStage.php
+namespace App\Pipelines\Stages;
+
+use Akira\LaravelLicense\Contracts\LicenseValidatorStage;
+use Akira\LaravelLicense\Pipelines\PipelineContext;
+
+final readonly class CustomValidationStage implements LicenseValidatorStage
+{
+    public function __invoke(PipelineContext $context): PipelineContext
+    {
+        // Custom validation logic
+        if ($this->shouldFail($context)) {
+            throw new \Exception('Custom validation failed');
+        }
+
+        return $context;
+    }
+
+    private function shouldFail(PipelineContext $context): bool
+    {
+        // Your logic here
+        return false;
+    }
+}
+```
+
+Register in service provider:
+
+```php
+// app/Providers/AppServiceProvider.php
+public function boot(): void
+{
+    // Add to stage mapping
+    $this->app->bind('license.stage-mapping', function () {
+        return [
+            // ... existing stages
+            'custom_validation' => CustomValidationStage::class,
+        ];
+    });
+}
+```
+
+Use in configuration:
 
 ```php
 'pipeline' => [
     'usage' => [
         'resolve_license',
         'status_check',
+        'custom_validation',  // Your custom stage
         'expiration_usage',
         'grace_period',
-        'my_custom_stage',  // Your custom stage
-        'domain_check',
-        'machine_check',
-        'credits_usage',
-        'abuse_heuristics',
+        // ... other stages
     ],
 ],
 ```
 
-See [Custom Stages Guide](04-pipelines.md#custom-stages) for implementation.
+See [Custom Stages Guide](04-pipelines.md#custom-stages) for complete implementation details.
 
 ---
 

@@ -15,4 +15,16 @@ final readonly class PipelineConfiguration
         public array $usageStages,
         public array $updateStages,
     ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function getStagesForType(string $type): array
+    {
+        return match ($type) {
+            'usage' => $this->usageStages,
+            'update' => $this->updateStages,
+            default => [],
+        };
+    }
 }

@@ -9,9 +9,11 @@ use Akira\LaravelLicense\Support\KeyGenerator;
 
 final readonly class RotateLicenseKeyAction
 {
+    public function __construct(private KeyGenerator $keyGenerator) {}
+
     public function handle(License $license): string
     {
-        $new = KeyGenerator::generate();
+        $new = $this->keyGenerator->generate();
 
         $license->update(['key' => $new]);
 

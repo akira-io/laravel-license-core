@@ -5,12 +5,13 @@ declare(strict_types=1);
 use Akira\LaravelLicense\Actions\RotateLicenseKeyAction;
 use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\Models\LicenseActivation;
+use Akira\LaravelLicense\Support\KeyGenerator;
 use Illuminate\Support\Sleep;
 
 it('can rotate license key', function () {
     $license = License::factory()->create(['key' => 'OLD-KEY-123']);
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $newKey = $action->handle($license);
 
     expect($newKey)->toBeString()
@@ -21,7 +22,7 @@ it('can rotate license key', function () {
 it('returns new key as string', function () {
     $license = License::factory()->create();
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $newKey = $action->handle($license);
 
     expect($newKey)->toBeString()
@@ -31,7 +32,7 @@ it('returns new key as string', function () {
 it('updates key in database', function () {
     $license = License::factory()->create(['key' => 'OLD-KEY-123']);
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $newKey = $action->handle($license);
 
     expect($license->fresh()->key)->toBe($newKey);
@@ -51,7 +52,7 @@ it('generates unique keys', function () {
     $license1 = License::factory()->create();
     $license2 = License::factory()->create();
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $key1 = $action->handle($license1);
     $key2 = $action->handle($license2);
 
@@ -61,7 +62,7 @@ it('generates unique keys', function () {
 it('can rotate same license multiple times', function () {
     $license = License::factory()->create();
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $key1 = $action->handle($license);
     $key2 = $action->handle($license);
     $key3 = $action->handle($license);
@@ -81,7 +82,7 @@ it('preserves other license attributes', function () {
     $originalType = $license->type;
     $originalMax = $license->max_activations;
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $action->handle($license);
 
     $fresh = $license->fresh();
@@ -109,7 +110,7 @@ it('maintains relationships after rotation', function () {
 
     $activationIds = [$activation1->id, $activation2->id];
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $action->handle($license);
 
     $fresh = $license->fresh();
@@ -121,7 +122,7 @@ it('maintains relationships after rotation', function () {
 it('generates key with expected format', function () {
     $license = License::factory()->create();
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $newKey = $action->handle($license);
 
     expect($newKey)->toBeString()
@@ -133,7 +134,7 @@ it('works with different license types', function () {
     $lifetime = License::factory()->lifetime()->create();
     $trial = License::factory()->trial()->create();
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
 
     $key1 = $action->handle($annual);
     $key2 = $action->handle($lifetime);
@@ -152,7 +153,7 @@ it('updates updated_at timestamp', function () {
 
     Sleep::sleep(1);
 
-    $action = new RotateLicenseKeyAction();
+    $action = new RotateLicenseKeyAction(app()->make(KeyGenerator::class));
     $action->handle($license);
 
     expect($license->fresh()->updated_at->isAfter($oldTimestamp))->toBeTrue();

@@ -10,12 +10,14 @@ use Akira\LaravelLicense\Exceptions\InsufficientCreditsException;
 use Akira\LaravelLicense\Exceptions\LicenseNotLoadedException;
 use Akira\LaravelLicense\Exceptions\UsageNotConfiguredException;
 use Akira\LaravelLicense\Models\LicenseUsage;
+use Akira\LaravelLicense\Support\ConfigManager;
 use Akira\LaravelLicense\ValueObjects\LicenseContext;
 use Akira\LaravelLicense\ValueObjects\UsageAmount;
 
 final readonly class CreditsUsageStage implements LicenseValidatorStage
 {
     public function __construct(
+        private ConfigManager $configManager,
         private int $amountToConsume = 0,
     ) {}
 
@@ -40,8 +42,14 @@ final readonly class CreditsUsageStage implements LicenseValidatorStage
         $consumedUnits = $usage->consumed_units;
 
         $amount = new UsageAmount($limit, $consumedUnits);
+        $creditsConfig = $this->configManager->getCredits();
 
-        if (! $amount->hasEnough($this->amountToConsume)) {
+        if ($this->amountToConsume > 0 && ! $amount->hasEnough($this->amountToConsume)) {
+            if ($creditsConfig->allowPartialConsumption && $amount->hasAny()) {
+                // Allow partial consumption - no exception
+                return $context;
+            }
+
             throw InsufficientCreditsException::create($this->amountToConsume, $amount->remaining());
         }
 

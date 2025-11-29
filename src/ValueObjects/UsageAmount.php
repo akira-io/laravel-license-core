@@ -20,4 +20,9 @@ final readonly class UsageAmount
     {
         return $this->remaining() >= $amount;
     }
+
+    public function hasAny(): bool
+    {
+        return $this->remaining() > 0;
+    }
 }

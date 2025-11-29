@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use Akira\LaravelLicense\ValueObjects\UsageAmount;
 
 it('creates with values', function () {
@@ -8,30 +9,42 @@ it('creates with values', function () {
 });
 
 it('calculates remaining', function () {
-    expect((new UsageAmount(1000, 250))->remaining())->toBe(750);
+    expect(new UsageAmount(1000, 250)->remaining())->toBe(750);
 });
 
 it('zero when equal', function () {
-    expect((new UsageAmount(100, 100))->remaining())->toBe(0);
+    expect(new UsageAmount(100, 100)->remaining())->toBe(0);
 });
 
 it('zero when exceeds', function () {
-    expect((new UsageAmount(100, 150))->remaining())->toBe(0);
+    expect(new UsageAmount(100, 150)->remaining())->toBe(0);
 });
 
 it('has enough true', function () {
-    expect((new UsageAmount(1000, 500))->hasEnough(400))->toBeTrue();
+    expect(new UsageAmount(1000, 500)->hasEnough(400))->toBeTrue();
 });
 
 it('has enough false', function () {
-    expect((new UsageAmount(1000, 500))->hasEnough(501))->toBeFalse();
+    expect(new UsageAmount(1000, 500)->hasEnough(501))->toBeFalse();
 });
 
 it('handles zero', function () {
-    expect((new UsageAmount(0, 0))->remaining())->toBe(0);
+    expect(new UsageAmount(0, 0)->remaining())->toBe(0);
 });
 
 it('is readonly', function () {
     $usage = new UsageAmount(100, 50);
     expect(fn () => $usage->limit = 200)->toThrow(Error::class);
+});
+
+it('has any returns true when credits available', function () {
+    expect(new UsageAmount(1000, 500)->hasAny())->toBeTrue();
+});
+
+it('has any returns false when no credits available', function () {
+    expect(new UsageAmount(100, 100)->hasAny())->toBeFalse();
+});
+
+it('has any returns false when exceeds limit', function () {
+    expect(new UsageAmount(100, 150)->hasAny())->toBeFalse();
 });
