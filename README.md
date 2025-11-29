@@ -21,9 +21,12 @@ A modern, secure and extensible licensing engine for Laravel applications. This 
 - Event logging for complete audit trail
 - Grace period support for expired licenses
 - Encrypted metadata storage
+- Comprehensive configuration system for all business rules
 - Configurable table names and models
+- Dynamic pipeline stage loading
+- Custom key generation formats (UUID and sequential)
 - Full factory support for testing
-- 100% test coverage (213 tests, 338 assertions)
+- 100% test coverage (438 tests, 764 assertions)
 
 ## Installation
 
@@ -214,6 +217,75 @@ $events = $license->events;
 $license = $activation->license;
 ```
 
+### Configuration System
+
+The package includes a comprehensive configuration system that controls all business rules without code changes. Configuration is centralized in `config/license.php`.
+
+#### Key Configuration Features
+
+**Key Generation**:
+```php
+'key_generation' => [
+    'prefix' => 'LIC',           // Key prefix
+    'format' => 'uuid',          // 'uuid' or 'sequential'
+],
+```
+
+**Grace Period**:
+```php
+'grace_period' => [
+    'lifetime' => null,          // Days after lifetime expiration
+    'annual' => null,            // Days after annual expiration
+    'subscription' => 30,        // Days after subscription expiration
+    'trial' => 7,                // Days after trial expiration
+    'credits' => null,           // Days after credits expiration
+],
+```
+
+**Abuse Detection**:
+```php
+'abuse_detection' => [
+    'enabled' => true,
+    'window_minutes' => 10,
+    'activation_threshold' => 10,
+    'events_to_monitor' => ['activated'],
+    'action_on_abuse' => 'log',  // 'log' or 'suspend'
+],
+```
+
+**Pipeline Configuration**:
+```php
+'pipeline' => [
+    'usage' => [
+        'resolve_license',
+        'status_check',
+        'expiration_usage',
+        'grace_period',
+        'domain_check',
+        'machine_check',
+        'credits_usage',
+        'abuse_heuristics',
+    ],
+    'update' => [
+        'resolve_license',
+        'status_check',
+        'expiration_usage',
+        'grace_period',
+        'update_window',
+    ],
+],
+```
+
+**Credits Configuration**:
+```php
+'credits' => [
+    'allow_partial_consumption' => false,
+    'allow_refund' => false,
+],
+```
+
+See the [Configuration Documentation](docs/02-configuration.md) for complete details on all configuration options.
+
 ### Custom Table Names
 
 You can customize table names in the config file:
@@ -294,7 +366,7 @@ Run tests with coverage:
 composer test:coverage
 ```
 
-The package includes **213 tests** with **100% code coverage** across all components:
+The package includes **438 tests** with **100% code coverage** across all components:
 
 ### Test Coverage
 
@@ -302,8 +374,10 @@ The package includes **213 tests** with **100% code coverage** across all compon
 - **Enums**: LicenseType, LicenseStatus, LicenseEventType
 - **Facades**: LaravelLicense
 - **Models**: License, LicenseActivation, LicenseEvent, LicenseUsage
-- **Support**: ConfigManager
+- **Support**: ConfigManager, KeyGenerator
 - **Value Objects**: DomainName, LicenseContext, LicenseKey, LicenseMeta, LicenseScopes, MachineFingerprint, UpdateEntitlement, UsageAmount
+- **Configuration Objects**: AbuseDetectionConfiguration, CreditsConfiguration, DomainValidationConfiguration, GracePeriodConfiguration, KeyGenerationConfiguration, LicenseTypeConfiguration, PipelineConfiguration
+- **Pipeline Stages**: All 9 validation stages with complete coverage
 
 ### Additional Test Commands
 
@@ -323,15 +397,16 @@ The package includes **213 tests** with **100% code coverage** across all compon
 Complete documentation is available in the [docs](docs/) directory:
 
 - [Index](docs/00-index.md) - Documentation index and navigation
-- [Introduction](docs/01-introduction.md) - Package overview and features
-- [Installation](docs/02-installation.md) - Installation and setup guide
-- [Configuration](docs/03-configuration.md) - Configuration options
-- [Models](docs/04-models.md) - Model documentation
-- [Usage Guide](docs/05-usage-guide.md) - Comprehensive usage examples
-- [Enums](docs/06-enums.md) - Available enumerations
-- [Factories](docs/07-factories.md) - Testing with factories
-- [Testing](docs/08-testing.md) - Comprehensive testing guide
-- [Value Objects](docs/09-value-objects.md) - Immutable domain objects
+- [Installation](docs/01-installation.md) - Installation and setup guide
+- [Configuration](docs/02-configuration.md) - Comprehensive configuration reference with all options
+- [Models](docs/03-models.md) - Model documentation and relationships
+- [Pipelines](docs/04-pipelines.md) - Pipeline architecture and custom stages
+- [Usage Guide](docs/05-usage-guide.md) - Comprehensive usage examples and patterns
+- [Value Objects](docs/06-value-objects.md) - Immutable domain objects
+- [Actions](docs/07-actions.md) - Domain actions and business logic
+- [Exceptions](docs/08-exceptions.md) - Exception handling and error cases
+- [Testing](docs/09-testing.md) - Comprehensive testing guide and examples
+- [Internationalization](docs/10-internationalization.md) - i18n and localization
 
 ## Changelog
 
