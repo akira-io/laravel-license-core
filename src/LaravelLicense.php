@@ -15,6 +15,7 @@ use Akira\LaravelLicense\Models\License;
 use Akira\LaravelLicense\ValueObjects\DomainName;
 use Akira\LaravelLicense\ValueObjects\LicenseData;
 use Akira\LaravelLicense\ValueObjects\LicenseKey;
+use Akira\LaravelLicense\ValueObjects\LicenseRequestData;
 use Akira\LaravelLicense\ValueObjects\MachineFingerprint;
 use Carbon\CarbonInterface;
 use InvalidArgumentException;
@@ -50,7 +51,7 @@ final readonly class LaravelLicense
             );
 
             if ($activate) {
-                $license = $context->license ?? $this->findLicenseByKey($licenseKey);
+                $license = $context->license ?? $this->findByKey($licenseKey);
 
                 $this->activate->handle(
                     license: $license,
@@ -66,21 +67,16 @@ final readonly class LaravelLicense
     }
 
     public function validateUpdate(
-        string $key,
+        LicenseRequestData $requestData,
         CarbonInterface $releaseDate,
-        ?string $domain = null,
-        ?string $machine = null,
     ): bool {
         try {
-            $licenseKey = LicenseKey::fromString($key);
-            $machineFingerprint = $machine ? MachineFingerprint::fromRaw($machine) : null;
-            $domainName = $domain ? DomainName::fromUrlOrHost($domain) : null;
 
             $this->validateUpdate->handle(
-                $licenseKey,
-                $releaseDate->toDateTimeString(),
-                $domainName,
-                $machineFingerprint
+                key: LicenseKey::fromString($requestData->key->key),
+                releaseDate: $releaseDate->toDateString(),
+                domain: $requestData->domain,
+                machine: $requestData->machine,
             );
 
             return true;
@@ -92,7 +88,7 @@ final readonly class LaravelLicense
     public function consumeCredits(string $key, int $amount): bool
     {
         try {
-            $license = $this->findLicenseByKey(LicenseKey::fromString($key));
+            $license = $this->findByKey(LicenseKey::fromString($key));
 
             return $this->consumeCredits->handle($license, $amount);
         } catch (Throwable) {
@@ -103,7 +99,7 @@ final readonly class LaravelLicense
     public function rotateKey(string $key): ?string
     {
         try {
-            $license = $this->findLicenseByKey(LicenseKey::fromString($key));
+            $license = $this->findByKey(LicenseKey::fromString($key));
 
             return $this->rotateKey->handle($license);
         } catch (Throwable) {
@@ -129,7 +125,7 @@ final readonly class LaravelLicense
     public function updateByKey(string $key, LicenseData $data): ?License
     {
         try {
-            $license = $this->findLicenseByKey(LicenseKey::fromString($key));
+            $license = $this->findByKey(LicenseKey::fromString($key));
 
             return $this->updateLicense->handle($license, $data);
         } catch (Throwable) {
@@ -137,7 +133,23 @@ final readonly class LaravelLicense
         }
     }
 
-    private function findLicenseByKey(LicenseKey $key): License
+    public function activate(LicenseRequestData $requestData): bool
+    {
+        try {
+
+            $this->activate->handle(
+                license: $requestData->key,
+                domain: $requestData->domain,
+                machineFingerPrint: $requestData->machine,
+            );
+
+            return true;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    public function findByKey(LicenseKey $key): License
     {
         return License::query()
             ->where('key', (string) $key)
